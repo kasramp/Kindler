@@ -2,67 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Results</title>
-    <style>
-        body {
-            font-family: serif;
-            color: #000;
-            background-color: #fff;
-            margin: 0;
-            padding: 0.5em;
-        }
-        h1 {
-            font-size: 1.2em;
-            margin-top: 0;
-            margin-bottom: 0.5em;
-        }
-        hr {
-            border: 0;
-            border-top: 1px solid #000;
-            margin: 0.5em 0;
-        }
-        .back-link, .result-title a {
-            color: #0000cc;
-            text-decoration: underline;
-        }
-        .result-block {
-            margin-bottom: 0.8em;
-        }
-        .result-title {
-            font-weight: bold;
-            line-height: 1.2;
-        }
-        .result-url {
-            color: #008000;
-            font-size: 0.9em;
-            line-height: 1;
-        }
-        .result-snippet {
-            font-size: 1em;
-            margin-top: 0.2em;
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <a href="{{ url_for('home.home') }}" class="back-link">← New Search</a>
-        <h1>Results for "{{ query }}"</h1>
+    <form action="{{ url_for('home.search') }}" method="get">
+        <a href="{{ url_for('home.home') }}">Home</a>
+        <input type="text" id="q" name="q" size="40" value="{{ query }}">
+        <input type="submit" value="Search">
+    </form>
+    <hr>
+    <h2>Results for "{{ query }}"</h2>
+    <hr>
+    {% for result in results %}
+        <div>
+            <b><a href="{{ url_for('home.readability_page', url=result['href']) }}">
+                {{ result['title'] }}
+            </a></b><br>
+            <small>{{ result['href'] }}</small><br>
+            {{ result['body'] }}
+        </div>
         <hr>
-        {% for result in results %}
-            <div class="result-block">
-                <div class="result-title">
-                    <a href="{{ url_for('home.readability_page', url=result['href']) }}">{{ result['title'] }}</a>
-                </div>
-                <div class="result-url">
-                    {{ result['href'] }}
-                </div>
-                <div class="result-snippet">
-                    {{ result['body'] }}
-                </div>
-            </div>
-            <hr>
-        {% endfor %}
-    </div>
+    {% endfor %}
 </body>
 </html>
