@@ -11,7 +11,8 @@
         <input type="submit" value="Search">
     </form>
     <hr>
-    <pre>Original Source: <a href="{{ url }}">{{ url }}</a></pre>
+    <pre>Original Source: <a href="{{ url }}">{{ url }}</a><br>[<a href="{{ url_for('home.save_page', url=url, format='html') }}">.html</a>][<a href="{{ url_for('home.save_page', url=url, format='epub') }}">.epub</a>][<a href="{{ url_for('home.save_page', url=url, format='mobi') }}">.mobi</a>][<a href="{{ url_for('home.save_page', url=url, format='azw3') }}">.azw3</a>]
+    </pre>
     <h1>{{ title | safe }}</h1>
     <div>
         {{ content | safe }}

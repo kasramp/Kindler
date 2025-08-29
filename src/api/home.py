@@ -1,10 +1,12 @@
+import io
 import logging
 from urllib.parse import urljoin, urlparse, quote
 
+import aspose.words as aw
 import requests
 from bs4 import BeautifulSoup
 from ddgs import DDGS
-from flask import render_template, Blueprint, request
+from flask import render_template, Blueprint, request, Response, send_file
 from readabilipy import simple_json_from_html_string
 
 home_bp = Blueprint('home', __name__)
@@ -33,7 +35,6 @@ def search():
     return render_template('result.html', query=query, results=results)
 
 
-# Case study: https://www.bbc.co.uk/programmes/b006mgyl
 @home_bp.route("/readability")
 def readability_page():
     url = request.args.get('url')
@@ -53,6 +54,36 @@ def readability_page():
     except Exception as e:
         logging.error(f"An error occurred during readability processing: {e}")
         return f"An error occurred during processing: {e}", 500
+
+
+@home_bp.route("/save_page")
+def save_page():
+    url = request.args.get('url')
+    save_format = request.args.get('format', 'html')
+    if not url:
+        return "No URL provided", 400
+    req = requests.get(url, headers=HEADERS, timeout=10)
+    article = simple_json_from_html_string(req.text, use_readability=True)
+    html_content = render_template(
+        'read_save_formatted.html',
+        title=article['title'],
+        content=clean_readability_html(article['content'], url),
+        url=url
+    )
+    doc = aw.Document()
+    builder = aw.DocumentBuilder(doc)
+    builder.insert_html(html_content)
+    if "html" == save_format:
+        response = Response(html_content, mimetype="text/html")
+        response.headers["Content-Disposition"] = f"attachment; filename={article['title']}.html"
+        return response
+    else:
+        buffer = io.BytesIO()
+        # doc.save(buffer, aw.SaveFormat.MOBI) -> .MOBI in dynamic formatting
+        doc.save(buffer, getattr(aw.SaveFormat, save_format.upper()))
+        buffer.seek(0)
+        file_name = f'{article['title']}.{save_format}'
+        return send_file(buffer, as_attachment=True, download_name=file_name)
 
 
 def clean_readability_html(html_content, base_url):
