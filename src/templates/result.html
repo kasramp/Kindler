@@ -17,7 +17,7 @@
     <hr>
     {% for result in results %}
         <div class="content">
-            <b><a href="{{ url_for('home.readability_page', url=result['href']) }}">
+            <b><a href="{{ url_for('home.readability_page', url=result['href'], q=query) }}">
                 {{ result['title'] }}
             </a></b><br>
             <small>{{ result['href'] }}</small><br>

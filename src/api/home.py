@@ -37,6 +37,7 @@ def search():
 
 @home_bp.route("/readability")
 def readability_page():
+    query = request.args.get('q')
     url = request.args.get('url')
     if not url:
         logging.warning("Readability URL is empty.")
@@ -46,7 +47,7 @@ def readability_page():
         req.raise_for_status()
         article = simple_json_from_html_string(req.text, use_readability=True)
         return render_template('read.html', title=article['title'],
-                               content=clean_readability_html(article['content'], url), url=url)
+                               query=query, content=clean_readability_html(article['content'], url, query), url=url)
 
     except requests.exceptions.RequestException as e:
         logging.error(f"Network error fetching URL: {e}")
@@ -59,6 +60,7 @@ def readability_page():
 @home_bp.route("/save_page")
 def save_page():
     url = request.args.get('url')
+    query = request.args.get('q')
     save_format = request.args.get('format', 'html')
     if not url:
         return "No URL provided", 400
@@ -67,7 +69,7 @@ def save_page():
     html_content = render_template(
         'read_save_formatted.html',
         title=article['title'],
-        content=clean_readability_html(article['content'], url),
+        content=clean_readability_html(article['content'], url, query),
         url=url
     )
     doc = aw.Document()
@@ -86,7 +88,7 @@ def save_page():
         return send_file(buffer, as_attachment=True, download_name=file_name)
 
 
-def clean_readability_html(html_content, base_url):
+def clean_readability_html(html_content, base_url, query):
     soup = BeautifulSoup(html_content, 'html.parser')
 
     # --- Remove unhelpful tags (media, scripts, forms, etc.) ---
@@ -108,7 +110,7 @@ def clean_readability_html(html_content, base_url):
         ol.decompose()
 
     # --- Rewrite links to go through /readability ---
-    readability_endpoint = '/readability?url='
+    readability_endpoint = f'/readability?q={query}&url='
     for link in soup.find_all('a', href=True):
         href = link['href']
         if href.startswith("#"):
@@ -139,6 +141,26 @@ def clean_readability_html(html_content, base_url):
     for p in soup.find_all('p'):
         if not p.get_text(strip=True):
             p.decompose()
+
+    # Find all <ul> and <li> tags in the document.
+    empty_tags_to_remove = []
+
+    # Iterate over all <li> tags.
+    for li_tag in soup.find_all('li'):
+        # Check if the tag's text content, after stripping whitespace, is empty.
+        if not li_tag.text.strip():
+            empty_tags_to_remove.append(li_tag)
+
+    # Iterate over all <ul> tags.
+    for ul_tag in soup.find_all('ul'):
+        # Check if the tag's text content, after stripping whitespace, is empty.
+        # This will also catch <ul> tags that only contained empty <li> tags.
+        if not ul_tag.text.strip():
+            empty_tags_to_remove.append(ul_tag)
+
+    # Decompose the tags outside the loop to avoid modifying the list being iterated over.
+    for tag in empty_tags_to_remove:
+        tag.decompose()
 
     # --- Return cleaned HTML ---
     return "\n".join(line.strip() for line in str(soup).splitlines() if line.strip())

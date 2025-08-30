@@ -29,12 +29,13 @@ def search():
         return "Please provide a search query.", 400
     response = get_gemini_content(f'{SEARCH_URL}/search?{query}')
     html_content = gemtext_to_html(response['content'])['content']
-    return render_template('result_gemini.html', query=query, content=clean_gemini_html(html_content, SEARCH_URL))
+    return render_template('result_gemini.html', query=query, content=clean_gemini_html(html_content, SEARCH_URL, query))
 
 
 @gemini_bp.route("/readability")
 def readability_page():
     url = request.args.get('url')
+    query = request.args.get('q')
     if not url:
         logging.warning("Readability URL is empty.")
         return "Please provide a URL to clean.", 400
@@ -42,13 +43,14 @@ def readability_page():
     response = get_gemini_content(url)
     html_content = gemtext_to_html(response['content'])
     return render_template('read_gemini.html', title=html_content['title'],
-                           content=clean_gemini_html(html_content['content'], url),
-                           url=url)
+                           content=clean_gemini_html(html_content['content'], url, query),
+                           url=url, query=query)
 
 
 @gemini_bp.route("/save_page")
 def save_page():
     url = request.args.get('url')
+    query = request.args.get('q')
     save_format = request.args.get('format', 'html')
     if not url:
         return "No URL provided", 400
@@ -56,7 +58,7 @@ def save_page():
     html_content = render_template(
         'read_save_formatted.html',
         title=article['title'],
-        content=clean_gemini_html(article['content'], url),
+        content=clean_gemini_html(article['content'], url, query),
         url=url
     )
     doc = aw.Document()
@@ -119,7 +121,7 @@ def get_gemini_content(url):
         return None
 
 
-def clean_gemini_html(html_content, base_url):
+def clean_gemini_html(html_content, base_url, query):
     soup = BeautifulSoup(html_content, 'html.parser')
     for link in soup.find_all('a', href=True):
         href = link['href']
@@ -130,12 +132,12 @@ def clean_gemini_html(html_content, base_url):
         scheme = urlparse(absolute_url).scheme
         if scheme == 'gemini':
             encoded = quote(absolute_url, safe='')
-            link['href'] = f'/gemini/readability?url={encoded}'
+            link['href'] = f'/gemini/readability?q={query}&url={encoded}'
         elif scheme in ('http', 'https'):
             encoded = quote(absolute_url, safe='')
-            link['href'] = f'/readability?url={encoded}'
+            link['href'] = f'/readability?q={query}&url={encoded}'
         elif absolute_url.startswith('/'):
-            link['href'] = f'/gemini/readability?url=gemini://{urlparse(base_url).netloc}{absolute_url}'
+            link['href'] = f'/gemini/readability?q={query}&url=gemini://{urlparse(base_url).netloc}{absolute_url}'
         elif scheme == 'mailto':
             pass
         else:
