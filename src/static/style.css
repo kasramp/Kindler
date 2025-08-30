@@ -1,0 +1,59 @@
+body {
+    background-color: #f0f0f0;
+    font-family: serif;
+    line-height: 1.5;
+    width: 90%;
+    margin: 1em auto;
+    font-size: 1.2em;
+}
+
+h1, h2, h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+p {
+    text-align: justify;
+    margin-bottom: 1em;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-size: 1.2em;
+}
+
+input[type="text"] {
+    font-size: 1.2em;
+    padding: 0.5em;
+    width: 80%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+input[type="submit"] {
+    font-size: 1.2em;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+}
+
+.top-nav a, .top-nav form {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 1.2em;
+}
+
+.top-nav a {
+    margin-right: 1em;
+}
+
+.top-nav form {
+    width: 70%;
+}
+
+.download-links a {
+    margin-right: 0.5em;
+}

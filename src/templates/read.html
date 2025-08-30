@@ -1,20 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="HandheldFriendly" content="true">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>{{ title | safe }}</title>
 </head>
 <body>
-    <form action="{{ url_for('home.search') }}" method="get">
-        <a href="{{ request.referrer or url_for('home.home') }}">← Back</a> |
-        <input type="text" id="q" name="q" size="40" value="{{ query }}">
-        <input type="submit" value="Search">
-    </form>
+    <div class="top-nav">
+        <a href="{{ request.referrer or url_for('home.home') }}">← Back</a>
+        <form action="{{ url_for('home.search') }}" method="get">
+            <input type="text" id="q" name="q" value="{{ query }}">
+            <input type="submit" value="Search">
+        </form>
+    </div>
     <hr>
-    <pre>Original Source: <a href="{{ url }}">{{ url }}</a><br>[<a href="{{ url_for('home.save_page', url=url, format='html') }}">.html</a>][<a href="{{ url_for('home.save_page', url=url, format='epub') }}">.epub</a>][<a href="{{ url_for('home.save_page', url=url, format='mobi') }}">.mobi</a>][<a href="{{ url_for('home.save_page', url=url, format='azw3') }}">.azw3</a>]
-    </pre>
+    <div class="source-info">
+        <pre>Original Source: <a href="{{ url }}">{{ url }}</a></pre>
+        <p class="download-links">
+            <a href="{{ url_for('home.save_page', url=url, format='html') }}">[.html]</a>
+            <a href="{{ url_for('home.save_page', url=url, format='epub') }}">[.epub]</a>
+            <a href="{{ url_for('home.save_page', url=url, format='mobi') }}">[.mobi]</a>
+            <a href="{{ url_for('home.save_page', url=url, format='azw3') }}">[.azw3]</a>
+        </p>
+    </div>
     <h1>{{ title | safe }}</h1>
-    <div>
+    <div class="content">
         {{ content | safe }}
     </div>
 </body>
