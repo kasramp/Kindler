@@ -104,3 +104,9 @@ hr {
     border: none;
     border-top: 1px solid #ccc;
 }
+
+code pre {
+    background-color: #e8e8e8;
+    border: 1px solid #dcdcdc;
+    padding: 0.7em;
+}

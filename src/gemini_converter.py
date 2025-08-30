@@ -1,61 +1,89 @@
-import re
+import html
 from html import escape
-from urllib.parse import urljoin
+
+
+def escape(text: str) -> str:
+    """A helper function to escape HTML characters in text."""
+    return html.escape(text)
 
 
 def gemtext_to_html(gemtext: str) -> dict:
+    """
+    Converts a Gemtext string into a dictionary containing HTML content and a title.
+
+    This enhanced version correctly handles code blocks, links, and blockquotes,
+    providing a more robust conversion.
+
+    Args:
+        gemtext: The input Gemtext content as a string.
+
+    Returns:
+        A dictionary with "title" and "content" keys, where content is an
+        HTML string.
+    """
     html_lines = []
     in_list = False
+    in_code_block = False
     title = None
 
-    for line in gemtext.splitlines():
+    lines = gemtext.splitlines()
+    for i, line in enumerate(lines):
+        # Handle code blocks
+        if line.startswith("```"):
+            if not in_code_block:
+                html_lines.append("<code><pre>")
+                in_code_block = True
+            else:
+                html_lines.append("</pre></code>")
+                in_code_block = False
+            continue
+
+        if in_code_block:
+            html_lines.append(escape(line))
+            continue
+
+        # Handle lists
+        if line.startswith("* "):
+            if not in_list:
+                html_lines.append("<ul>")
+                in_list = True
+            html_lines.append(f"<li>{escape(line[2:])}</li>")
+            continue
+        elif in_list:
+            html_lines.append("</ul>")
+            in_list = False
+
+        # Handle headings
         if line.startswith("### "):
             html_lines.append(f"<h3>{escape(line[4:])}</h3>")
         elif line.startswith("## "):
             html_lines.append(f"<h2>{escape(line[3:])}</h2>")
         elif line.startswith("# "):
-            # Use first heading as title
             heading_text = line[2:]
             if title is None:
                 title = heading_text
             html_lines.append(f"<h1>{escape(heading_text)}</h1>")
-        elif line.startswith("* "):
-            if not in_list:
-                html_lines.append("<ul>")
-                in_list = True
-            html_lines.append(f"<li>{escape(line[2:])}</li>")
+        # Handle links
+        elif line.startswith('=>'):
+            parts = line[2:].strip().split(maxsplit=1)
+            href = parts[0]
+            link_text = parts[1] if len(parts) > 1 else href
+            html_lines.append(f'<p><a href="{href}">{escape(link_text)}</a></p>')
+        # Handle blockquotes
+        elif line.startswith(">"):
+            html_lines.append(f"<blockquote>{escape(line[1:].strip())}</blockquote>")
+        # Handle regular paragraphs
         else:
-            if in_list:
-                html_lines.append("</ul>")
-                in_list = False
-            if line.startswith('=>'):
-                href, text = clean_gemini_link(line)
-                if href and text:
-                    html_lines.append(f'<p><a href="{href}">{text}</a></p>')
-
-            elif line.startswith("```"):
-                # NOTE: for simplicity, this just opens <pre>. A real parser should detect closing ```
-                html_lines.append("<pre>")
-            else:
+            if line:
                 html_lines.append(f"<p>{escape(line)}</p>")
 
+    # Close any open list or code block at the end of the file
     if in_list:
         html_lines.append("</ul>")
+    if in_code_block:
+        html_lines.append("</code></pre>")
 
     return {
         "title": title,
         "content": "\n".join(html_lines)
     }
-
-
-def clean_gemini_link(line, base_url=""):
-    raw = line[2:].lstrip()
-    match = re.match(r"(\S+)(?:\s+(.*))?", raw)
-    if not match:
-        return None, None
-    url = match.group(1)
-    link_text = match.group(2) if match.group(2) else url
-    url = re.sub(r'[\t\u21BA\u21BB\u279C➜↩↪]+$', '', url)
-    if base_url:
-        url = urljoin(base_url, url)
-    return escape(url), escape(link_text)
