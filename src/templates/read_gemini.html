@@ -16,7 +16,7 @@
     </div>
     <hr>
     <div class="source-info">
-        <pre>Original Source: <a href="{{ url }}">{{ url }}</a></pre>
+        <pre style="white-space: pre-wrap; word-wrap: break-word;">Original Source: <a href="{{ url }}">{{ url }}</a></pre>
         <p class="download-links">
             <a href="{{ url_for('gemini.save_page', url=url, format='html') }}">[.html]</a>
             <a href="{{ url_for('gemini.save_page', url=url, format='epub') }}">[.epub]</a>
@@ -24,7 +24,6 @@
             <a href="{{ url_for('gemini.save_page', url=url, format='azw3') }}">[.azw3]</a>
         </p>
     </div>
-    <h1>{{ title | safe }}</h1>
     <div class="content">
         {{ content | safe }}
     </div>

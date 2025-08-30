@@ -6,12 +6,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Kindler Gemini Search</title>
 </head>
-<body>
-    <h2>Kindler Gemini Search</h2>
+<body class="home">
+    <h2>🔎 Kindler Gemini Search</h2>
     <form action="{{ url_for('gemini.search') }}" method="get">
-        <label for="input_text">{{ label }}</label><br>
-        <input id="input_text" size="40" type="text" name="q"
-               placeholder="Search the web..."><br><br>
+        <label for="input_text">{{ label }}</label>
+        <input id="input_text" type="text" name="q" placeholder="Search the web...">
+        <br>
         <input type="submit" value="Search">
     </form>
 </body>

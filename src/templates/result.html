@@ -15,10 +15,8 @@
         </form>
     </div>
     <hr>
-    <h2>Results for "{{ query }}"</h2>
-    <hr>
     {% for result in results %}
-        <div>
+        <div class="content">
             <b><a href="{{ url_for('home.readability_page', url=result['href']) }}">
                 {{ result['title'] }}
             </a></b><br>
