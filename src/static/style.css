@@ -117,3 +117,60 @@ small, time {
     color: #333;
     font-style: italic;
 }
+
+table {
+    margin: 1em auto;
+    border-spacing: 1em;
+}
+
+td {
+    text-align: center;
+    width: 200px;
+    padding-bottom: 1em;
+    vertical-align: top;
+}
+
+td img {
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+}
+
+td a {
+    display: block;
+    text-align: center;
+}
+
+td a small {
+    display: block;
+    margin-top: 0.3em;
+    white-space: normal;
+    word-wrap: break-word;
+    font-size: 0.9em;
+    font-style: italic;
+    color: #333;
+}
+
+table tr hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+}
+
+
+.h1-ebook {
+    font-size: 1.5em;
+    margin-bottom: 0.2em;
+    text-align: center;
+}
+.h2-ebook {
+    font-size: 1.2em;
+    font-weight: normal;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 1em;
+    font-style: italic;
+    color: #333;
+}
