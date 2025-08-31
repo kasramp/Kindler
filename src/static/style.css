@@ -69,6 +69,10 @@ input[type="submit"] {
     margin: 0;
 }
 
+.top-nav .drop-down {
+    width: 100%;
+}
+
 .download-links a {
     margin-right: 0.5em;
 }
@@ -109,4 +113,16 @@ code pre {
     background-color: #e8e8e8;
     border: 1px solid #dcdcdc;
     padding: 0.7em;
+}
+
+.drop-down {
+  width: 50%;
+  font-size: 1.2em;
+  font-weight: bold;
+  box-sizing: border-box;
+  max-width: 25em;
+  border-radius: 0.3em;
+  border: 1px solid #aaa;
+  padding: 0.6em;
+  margin-bottom: 1em;
 }
