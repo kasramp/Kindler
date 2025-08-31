@@ -4,13 +4,13 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="HandheldFriendly" content="true">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Google News</title>
+    <title>Kindler News</title>
 </head>
 <body class="home">
-<h2>📰 Google News</h2>
+<h2>📰 Kindler News</h2>
 <form action="{{ url_for('news.search') }}" method="get">
     <select class="drop-down" id="news-category" name="news-category">
-        {% set options = [('top', 'World Top News'), ('usa', 'USA'),
+        {% set options = [('top', 'World Top News'), ('usa-en', 'USA'),
         ('germany-en', 'Germany (EN)'), ('germany-de', 'Germany (DE)'),
         ('technology', 'Technology'), ('business','Business')] %}
         {% for value, label in options %}

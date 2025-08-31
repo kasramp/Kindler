@@ -9,7 +9,6 @@
 <body class="home">
     <h2>🔎 Kindler Gemini Search</h2>
     <form action="{{ url_for('gemini.search') }}" method="get">
-        <label for="input_text">{{ label }}</label>
         <input id="input_text" type="text" name="q" placeholder="Search the web...">
         <br>
         <input type="submit" value="Search">

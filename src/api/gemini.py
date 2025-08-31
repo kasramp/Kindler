@@ -8,6 +8,7 @@ from urllib.parse import urljoin, urlparse, quote
 import aspose.words as aw
 from bs4 import BeautifulSoup
 from flask import render_template, Blueprint, request, Response, send_file
+from pathvalidate import sanitize_filename
 
 from src.gemini_converter import gemtext_to_html
 
@@ -29,7 +30,8 @@ def search():
         return "Please provide a search query.", 400
     response = get_gemini_content(f'{SEARCH_URL}/search?{query}')
     html_content = gemtext_to_html(response['content'])['content']
-    return render_template('result_gemini.html', query=query, content=clean_gemini_html(html_content, SEARCH_URL, query))
+    return render_template('result_gemini.html', query=query,
+                           content=clean_gemini_html(html_content, SEARCH_URL, query))
 
 
 @gemini_bp.route("/readability")
@@ -66,14 +68,15 @@ def save_page():
     builder.insert_html(html_content)
     if "html" == save_format:
         response = Response(html_content, mimetype="text/html")
-        response.headers["Content-Disposition"] = f"attachment; filename={article['title']}.html"
+        response.headers[
+            "Content-Disposition"] = f"attachment; filename={sanitize_filename(article['title'] + '.html')}"
         return response
     else:
         buffer = io.BytesIO()
         # doc.save(buffer, aw.SaveFormat.MOBI) -> .MOBI in dynamic formatting
         doc.save(buffer, getattr(aw.SaveFormat, save_format.upper()))
         buffer.seek(0)
-        file_name = f'{article['title']}.{save_format}'
+        file_name = sanitize_filename(f'{article['title']}.{save_format}')
         return send_file(buffer, as_attachment=True, download_name=file_name)
 
 

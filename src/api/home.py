@@ -7,6 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 from ddgs import DDGS
 from flask import render_template, Blueprint, request, Response, send_file
+from pathvalidate import sanitize_filename
 from readabilipy import simple_json_from_html_string
 
 home_bp = Blueprint('home', __name__)
@@ -77,14 +78,15 @@ def save_page():
     builder.insert_html(html_content)
     if "html" == save_format:
         response = Response(html_content, mimetype="text/html")
-        response.headers["Content-Disposition"] = f"attachment; filename={article['title']}.html"
+        response.headers[
+            "Content-Disposition"] = f"attachment; filename={sanitize_filename(article['title'] + '.html')}"
         return response
     else:
         buffer = io.BytesIO()
         # doc.save(buffer, aw.SaveFormat.MOBI) -> .MOBI in dynamic formatting
         doc.save(buffer, getattr(aw.SaveFormat, save_format.upper()))
         buffer.seek(0)
-        file_name = f'{article['title']}.{save_format}'
+        file_name = sanitize_filename(f'{article['title']}.{save_format}')
         return send_file(buffer, as_attachment=True, download_name=file_name)
 
 
