@@ -1,13 +1,14 @@
-import io
 import logging
+import os
 import socket
 import ssl
+import subprocess
 import sys
+import tempfile
 from urllib.parse import urljoin, urlparse, quote
 
-import aspose.words as aw
 from bs4 import BeautifulSoup
-from flask import render_template, Blueprint, request, Response, send_file
+from flask import render_template, Blueprint, request, Response, send_file, abort
 from pathvalidate import sanitize_filename
 
 from src.gemini_converter import gemtext_to_html
@@ -15,6 +16,8 @@ from src.gemini_converter import gemtext_to_html
 gemini_bp = Blueprint('gemini', __name__, url_prefix='/gemini')
 
 SEARCH_URL = "gemini://tlgs.one"
+
+allowed_formats = {'html', 'epub', 'mobi', 'azw3'}
 
 
 @gemini_bp.route('/')
@@ -49,13 +52,16 @@ def readability_page():
                            url=url, query=query)
 
 
-@gemini_bp.route("/save_page")
+@gemini_bp.route('/save_page')
 def save_page():
     url = request.args.get('url')
     query = request.args.get('q')
     save_format = request.args.get('format', 'html')
     if not url:
-        return "No URL provided", 400
+        return 'No URL provided', 400
+    if save_format not in allowed_formats:
+        abort(400, 'Invalid format')
+
     article = gemtext_to_html(get_gemini_content(url)['content'])
     html_content = render_template(
         'read_save_formatted.html',
@@ -63,21 +69,39 @@ def save_page():
         content=clean_gemini_html(article['content'], url, query),
         url=url
     )
-    doc = aw.Document()
-    builder = aw.DocumentBuilder(doc)
-    builder.insert_html(html_content)
-    if "html" == save_format:
-        response = Response(html_content, mimetype="text/html")
+    if 'html' == save_format:
+        response = Response(html_content, mimetype='text/html')
         response.headers[
-            "Content-Disposition"] = f"attachment; filename={sanitize_filename(article['title'] + '.html')}"
+            'Content-Disposition'] = f"attachment; filename={sanitize_filename(article['title'] + '.html')}"
         return response
     else:
-        buffer = io.BytesIO()
-        # doc.save(buffer, aw.SaveFormat.MOBI) -> .MOBI in dynamic formatting
-        doc.save(buffer, getattr(aw.SaveFormat, save_format.upper()))
-        buffer.seek(0)
-        file_name = sanitize_filename(f'{article['title']}.{save_format}')
-        return send_file(buffer, as_attachment=True, download_name=file_name)
+        with tempfile.NamedTemporaryFile(suffix='.html', delete=False, mode='w', encoding='utf-8') as html_tmp:
+            html_tmp.write(html_content)
+            input_html_file = html_tmp.name
+        with tempfile.NamedTemporaryFile(suffix=f'.{save_format}', delete=False) as output_tmp:
+            output_file = output_tmp.name
+        try:
+            subprocess.run(
+                ['ebook-convert', input_html_file, output_file, '--title', article['title'], '--chapter', '//h1',
+                 '--level1-toc', '//h1'], check=True)
+            download_file_name = sanitize_filename(f'{article['title']}.{save_format}')
+            response = send_file(output_file, as_attachment=True, download_name=download_file_name)
+
+            @response.call_on_close
+            def cleanup():
+                for f in [input_html_file, output_file]:
+                    try:
+                        os.remove(f)
+                        logging.info(f'File {f} deleted')
+                    except OSError:
+                        pass
+
+            return response
+        except subprocess.CalledProcessError as e:
+            os.remove(input_html_file)
+            if os.path.exists(output_file):
+                os.remove(output_file)
+            abort(500, f'Conversion failed: {e}')
 
 
 def get_gemini_content(url):

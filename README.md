@@ -36,3 +36,8 @@ To install from the dependency file:
 $ pip3 install -r requirements.txt
 ```
 
+## Calibre
+
+To support generating epub, mobi, azw3 of pages on the fly, need to install calibre, or more specific `ebook-convert` as it's invoked as a sub process to generate ebooks.
+
+The usage of `aspose-words` library is remove as it not only left a notice that the library is not paid for but also wouldn't convert more than 20 pages. So it was too annoying to work with.
