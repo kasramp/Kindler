@@ -26,6 +26,7 @@
             {% if book['formats']['application/x-mobipocket-ebook'] %}
                 <a href="{{ book['formats']['application/x-mobipocket-ebook'] }}">[.mobi]</a>
             {% endif %}
+                <a href="https://www.gutenberg.org/ebooks/{{ book['id'] }}.kindle.images">[.mobi (old)]</a>
         </p>
     </div>
     <h1 class="h1-ebook">{{ book['title'] }}</h1>
