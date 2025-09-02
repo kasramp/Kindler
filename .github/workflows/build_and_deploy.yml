@@ -1,0 +1,49 @@
+name: Build and deploy
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Check app starts
+      run: |
+        python -m kindler.app --port 5000 &
+        APP_PID=$!
+        sleep 5
+        kill $APP_PID
+    - name: Update release version file
+      shell: bash
+      run: |
+        chmod +x "${GITHUB_WORKSPACE}/update_release_version.sh"
+        ./${GIHUB_WORKSPACE}/update_release_version.sh
+        echo "TAGGED_VERSION<<EOF" >> $GITHUB_OUTPUT
+        echo "$(cat ./version.txt)" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+      id: version
+    - name: Build and push Docker image
+      shell: bash
+      env:
+        TAGGED_VERSION: ${{ steps.version.outputs.TAGGED_VERSION }}
+        EMAIL: ${{ secrets.EMAIL }}
+        USERNAME: ${{ secrets.USERNAME }}
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        echo "New tag version is ${TAGGED_VERSION}"
+        pwd ${GITHUB_WORKSPACE}
+        chmod +x "${GITHUB_WORKSPACE}/util/release.sh"
+        ./${GIHUB_WORKSPACE}/util/release.sh
