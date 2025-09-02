@@ -70,3 +70,17 @@ To test:
 ```bash
 $ docker run -p 8181:8181 kindler-app
 ```
+
+## Formatting
+
+Run:
+
+```bash
+$ black --check .
+```
+
+To fix:
+
+```bash
+$ black .
+```
