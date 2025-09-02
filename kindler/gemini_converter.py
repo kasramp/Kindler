@@ -64,7 +64,7 @@ def gemtext_to_html(gemtext: str) -> dict:
                 title = heading_text
             html_lines.append(f"<h1>{escape(heading_text)}</h1>")
         # Handle links
-        elif line.startswith('=>'):
+        elif line.startswith("=>"):
             parts = line[2:].strip().split(maxsplit=1)
             href = parts[0]
             link_text = parts[1] if len(parts) > 1 else href
@@ -83,7 +83,4 @@ def gemtext_to_html(gemtext: str) -> dict:
     if in_code_block:
         html_lines.append("</code></pre>")
 
-    return {
-        "title": title,
-        "content": "\n".join(html_lines)
-    }
+    return {"title": title, "content": "\n".join(html_lines)}
