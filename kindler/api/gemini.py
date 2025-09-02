@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from flask import render_template, Blueprint, request, Response, send_file, abort
 from pathvalidate import sanitize_filename
 
-from src.gemini_converter import gemtext_to_html
+from kindler.gemini_converter import gemtext_to_html
 
 gemini_bp = Blueprint('gemini', __name__, url_prefix='/gemini')
 
