@@ -21,5 +21,6 @@ jobs:
     - name: Check app starts
       run: |
         python -m kindler.app --port 5000 &
+        APP_PID=$!
         sleep 5
-        pkill -f flask
+        kill $APP_PID
