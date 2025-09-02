@@ -71,6 +71,12 @@ To test:
 $ docker run -p 8181:8181 kindler-app
 ```
 
+Test an image from Docker Hub:
+
+```bash
+$ docker run -p 8181:8181 kasramp/kindler:v0.0.2
+```
+
 ## Formatting
 
 Run:
