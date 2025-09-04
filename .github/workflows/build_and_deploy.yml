@@ -53,4 +53,4 @@ jobs:
         echo "New tag version is ${TAGGED_VERSION}"
         pwd ${GITHUB_WORKSPACE}
         chmod +x "${GITHUB_WORKSPACE}/util/release.sh"
-        ./${GITHUB_WORKSPACE}/util/release.sh
+        bash ${GITHUB_WORKSPACE}/util/release.sh
