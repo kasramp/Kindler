@@ -9,7 +9,7 @@ git symbolic-ref HEAD
 IMAGE_NAME=kasramp/kindler &&
 docker login -u "$DOCKER_USERNAME" --password-stdin <<< "$DOCKER_PASSWORD" &&
 docker buildx create --use &&
-docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE_NAME":latest -t "$IMAGE_NAME:$TAGGED_VERSION" . --push
+docker buildx build --platform "$ARCHITECTURE" -t "$IMAGE_NAME":latest -t "$IMAGE_NAME:$TAGGED_VERSION" . --push
 
 if [ "$ARCHITECTURE" = "linux/amd64" ]; then
   git add version.txt &&
