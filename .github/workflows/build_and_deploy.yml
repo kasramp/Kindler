@@ -54,3 +54,14 @@ jobs:
         pwd ${GITHUB_WORKSPACE}
         chmod +x "${GITHUB_WORKSPACE}/util/release.sh"
         bash ${GITHUB_WORKSPACE}/util/release.sh
+    - name: Deploy to production
+      shell: bash
+      env:
+        TAGGED_VERSION: ${{ steps.version.outputs.TAGGED_VERSION }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+      run: |
+        pwd ${GITHUB_WORKSPACE}
+        chmod +x "${GITHUB_WORKSPACE}/util/webhook_deploy.sh"
+        ./${GIHUB_WORKSPACE}/util/webhook_deploy.sh
