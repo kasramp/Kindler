@@ -12,18 +12,16 @@ app.register_blueprint(news_bp)
 app.register_blueprint(gutenberg_bp)
 app.register_blueprint(healthz, url_prefix="/healthz")
 
+
 def liveness():
     return True, {"status": "up"}
+
 
 def readiness():
     return True, {"status": "up"}
 
-app.config.update(
-    HEALTHZ={
-        "live": liveness,
-        "ready": readiness
-    }
-)
+
+app.config.update(HEALTHZ={"live": liveness, "ready": readiness})
 
 if __name__ == "__main__":
     app.run(debug=True)
