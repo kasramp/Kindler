@@ -1,0 +1,27 @@
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      docker_image:
+        description: 'Docker image tag to deploy'
+        required: true
+        default: 'latest'
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to production
+        shell: bash
+        env:
+          TAGGED_VERSION: ${{ inputs.docker_image }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+        run: |
+          pwd ${GITHUB_WORKSPACE}
+          chmod +x "${GITHUB_WORKSPACE}/util/webhook_deploy.sh"
+          ./${GIHUB_WORKSPACE}/util/webhook_deploy.sh

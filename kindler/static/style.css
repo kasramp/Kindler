@@ -24,23 +24,18 @@ form {
     margin: 1.5em 0;
 }
 
-input[type="submit"] {
-    font-size: 1.2em;
-    padding: 0.6em 1.2em;
-    cursor: pointer;
-    background-color: #e6e6e6;
-    border: 1px solid #aaa;
-    border-radius: 0.3em;
-}
-
 .top-nav {
     margin-bottom: 0;
     white-space: nowrap;
 }
 .top-nav a,
-.top-nav input[type="text"],
+.top-nav input[type="text"] {
+    font-size: 1.2em;
+}
+
 .top-nav input[type="submit"] {
     font-size: 1.2em;
+    margin-right: 0.5em;
 }
 .top-nav a {
     display: inline-block;
@@ -173,4 +168,54 @@ table tr hr {
     margin-bottom: 1em;
     font-style: italic;
     color: #333;
+}
+
+.truncated-url {
+    display: inline-block;    /* allows measuring width */
+    max-width: 100%;          /* never exceeds parent width */
+    white-space: nowrap;       /* keep on a single line */
+    overflow: hidden;         /* hide excess text */
+    text-overflow: ellipsis;  /* show "..." at the end */
+    vertical-align: bottom;   /* optional for alignment */
+}
+
+.app-table {
+    margin-top: 2em;
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+}
+
+.app-table td {
+    width: 33%;
+    padding: 1em;
+}
+
+.app-icon {
+    display: inline-block;
+    width: 8em;
+    height: 8em;
+    background-color: #ddd;
+    border-radius: 1em;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+    font-family: serif;
+    padding-top: 1.5em;
+    box-sizing: border-box;
+}
+
+.app-icon i {
+    font-size: 2.5em;
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+.app-icon small {
+    display: block;
+    font-size: 1em;
+}
+
+.app-icon:hover {
+    background-color: #ccc;
 }

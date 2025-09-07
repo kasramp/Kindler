@@ -1,6 +1,6 @@
 import logging
 
-from flask import render_template, Blueprint, request, redirect
+from flask import render_template, Blueprint, request, redirect, url_for
 from googlenewsdecoder import gnewsdecoder
 from pygooglenews import GoogleNews
 
@@ -34,7 +34,7 @@ def search():
 @news_bp.route("/readability")
 def readability_page():
     url = decode_google_news_url(request.args.get("url"))
-    return redirect(f"/readability?q=&url={url}")
+    return redirect(url_for("web.readability_page", url=url, q=""))
 
 
 def decode_google_news_url(url):
