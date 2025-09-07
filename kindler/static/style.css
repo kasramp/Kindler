@@ -24,23 +24,18 @@ form {
     margin: 1.5em 0;
 }
 
-input[type="submit"] {
-    font-size: 1.2em;
-    padding: 0.6em 1.2em;
-    cursor: pointer;
-    background-color: #e6e6e6;
-    border: 1px solid #aaa;
-    border-radius: 0.3em;
-}
-
 .top-nav {
     margin-bottom: 0;
     white-space: nowrap;
 }
 .top-nav a,
-.top-nav input[type="text"],
+.top-nav input[type="text"] {
+    font-size: 1.2em;
+}
+
 .top-nav input[type="submit"] {
     font-size: 1.2em;
+    margin-right: 0.5em;
 }
 .top-nav a {
     display: inline-block;
@@ -173,4 +168,13 @@ table tr hr {
     margin-bottom: 1em;
     font-style: italic;
     color: #333;
+}
+
+.truncated-url {
+    display: inline-block;    /* allows measuring width */
+    max-width: 100%;          /* never exceeds parent width */
+    white-space: nowrap;       /* keep on a single line */
+    overflow: hidden;         /* hide excess text */
+    text-overflow: ellipsis;  /* show "..." at the end */
+    vertical-align: bottom;   /* optional for alignment */
 }

@@ -20,7 +20,7 @@
             <b><a href="{{ url_for('home.readability_page', url=result['href'], q=query) }}">
                 {{ result['title'] }}
             </a></b><br>
-            <small>{{ result['href'] }}</small><br>
+            <small class="truncated-url">{{ result['href'] }}</small><br>
             {{ result['body'] }}
         </div>
         <hr>
