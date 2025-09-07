@@ -3,11 +3,12 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="HandheldFriendly" content="true">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>Kindler Search</title>
 </head>
 <body class="home">
-    <h2>🔎 Kindler Search</h2>
+    <h2><i class="fa-solid fa-magnifying-glass"></i> Kindler Search</h2>
     <form action="{{ url_for('home.search') }}" method="get">
         <input id="input_text" type="text" name="q" placeholder="Search the web...">
         <br>

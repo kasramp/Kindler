@@ -1,4 +1,6 @@
 from flask import Flask
+
+from kindler.api.front import front_bp
 from kindler.api.home import home_bp
 from kindler.api.gemini import gemini_bp
 from kindler.api.news import news_bp
@@ -10,6 +12,7 @@ app.register_blueprint(home_bp)
 app.register_blueprint(gemini_bp)
 app.register_blueprint(news_bp)
 app.register_blueprint(gutenberg_bp)
+app.register_blueprint(front_bp)
 app.register_blueprint(healthz, url_prefix="/healthz")
 
 
