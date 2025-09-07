@@ -171,12 +171,12 @@ table tr hr {
 }
 
 .truncated-url {
-    display: inline-block;    /* allows measuring width */
-    max-width: 100%;          /* never exceeds parent width */
-    white-space: nowrap;       /* keep on a single line */
-    overflow: hidden;         /* hide excess text */
-    text-overflow: ellipsis;  /* show "..." at the end */
-    vertical-align: bottom;   /* optional for alignment */
+    display: inline-block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
 }
 
 .app-table {
@@ -197,6 +197,7 @@ table tr hr {
     height: 8em;
     background-color: #ddd;
     border-radius: 1em;
+    border: 1px solid #999;
     text-decoration: none;
     color: black;
     font-weight: bold;
@@ -217,5 +218,41 @@ table tr hr {
 }
 
 .app-icon:hover {
+    background-color: #ccc;
+}
+
+.h1-error {
+    font-size: 3em;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+}
+
+.h2-error {
+    font-size: 1.5em;
+    margin-bottom: 1.5em;
+    font-weight: normal;
+    font-style: italic;
+    color: #666;
+}
+
+.error-icon {
+    font-size: 6em;
+    color: #ff6666;
+}
+
+a.retry {
+    font-size: 1.2em;
+    padding: 0.6em 1.2em;
+    background-color: #ddd;
+    display: inline-block;
+    text-decoration: none;
+    border: 1px solid #999;
+    border-radius: 0.3em;
+    font-weight: bold;
+    color: black;
+    margin-top: 1em;
+}
+
+a.retry:hover {
     background-color: #ccc;
 }

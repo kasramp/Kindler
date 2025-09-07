@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse, quote
 import requests
 from bs4 import BeautifulSoup
 from ddgs import DDGS
-from flask import render_template, Blueprint, request, Response
+from flask import render_template, Blueprint, request, Response, redirect, url_for
 from flask import send_file, abort
 from pathvalidate import sanitize_filename
 from readabilipy import simple_json_from_html_string
@@ -60,8 +60,11 @@ def readability_page():
         )
 
     except requests.exceptions.RequestException as e:
-        logging.error(f"Network error fetching URL: {e}")
-        return f"A network error occurred: {e}", 500
+        logging.warning(f"Network error fetching URL: {e}")
+        status_code = 500  # default
+        if hasattr(e, "response") and e.response is not None:
+            status_code = getattr(e.response, "status_code", 500)
+        return redirect(url_for("error.error", status_code=status_code))
     except Exception as e:
         logging.error(f"An error occurred during readability processing: {e}")
         return f"An error occurred during processing: {e}", 500
