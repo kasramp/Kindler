@@ -1,5 +1,7 @@
 #!/bin/sh
 
+file_path="kindler/templates/home.html"
+current_date_time=$(date -u +"%Y-%m-%d %H:%M")
 version=$(cat version.txt)
 
 major_minor=$(echo "$version" | cut -d. -f1-2)
@@ -10,3 +12,4 @@ new_patch=$((patch + 1))
 new_version="$major_minor.$new_patch"
 
 echo "$new_version" > version.txt
+sed -i "s|\(<code id=\"application-details\">\)[^<]*\(</code>\)|\1$new_version - $current_date_time\2|" "$file_path"

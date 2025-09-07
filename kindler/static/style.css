@@ -171,12 +171,12 @@ table tr hr {
 }
 
 .truncated-url {
-    display: inline-block;    /* allows measuring width */
-    max-width: 100%;          /* never exceeds parent width */
-    white-space: nowrap;       /* keep on a single line */
-    overflow: hidden;         /* hide excess text */
-    text-overflow: ellipsis;  /* show "..." at the end */
-    vertical-align: bottom;   /* optional for alignment */
+    display: inline-block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
 }
 
 .app-table {
