@@ -11,6 +11,8 @@ def error():
 
 def map_status_code_to_error(status_code):
     match status_code:
+        case "401":
+            return "Website denied access (401)"
         case "403":
             return "Website denied access (403)"
         case "404":
