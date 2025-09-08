@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_healthz import healthz
 
 from kindler.api.error import error_bp
@@ -27,6 +27,12 @@ def readiness():
 
 
 app.config.update(HEALTHZ={"live": liveness, "ready": readiness})
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect(url_for("error.error", status_code=404))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -46,7 +46,7 @@ def readability_page():
     url = request.args.get("url")
     if not url:
         logging.warning("Readability URL is empty.")
-        return "Please provide a URL to clean.", 400
+        return redirect(url_for("error.error", status_code=400))
     try:
         req = requests.get(url, headers=HEADERS, timeout=10)
         req.raise_for_status()
@@ -61,7 +61,7 @@ def readability_page():
 
     except requests.exceptions.RequestException as e:
         logging.warning(f"Network error fetching URL: {e}")
-        status_code = 500  # default
+        status_code = 500
         if hasattr(e, "response") and e.response is not None:
             status_code = getattr(e.response, "status_code", 500)
         return redirect(url_for("error.error", status_code=status_code))
@@ -178,8 +178,8 @@ def clean_readability_html(html_content, base_url, query):
     ):
         ol.decompose()
 
-    # --- Rewrite links to go through /readability ---
-    readability_endpoint = f"/readability?q={query}&url="
+    # --- Rewrite links to go through /web/readability ---
+    readability_endpoint = f"/web/readability?q={query}&url="
     for link in soup.find_all("a", href=True):
         href = link["href"]
         if href.startswith("#"):

@@ -11,12 +11,14 @@ def error():
 
 def map_status_code_to_error(status_code):
     match status_code:
+        case "400":
+            return "Please provide a URL to clean (400)"
         case "401":
             return "Website denied access (401)"
         case "403":
             return "Website denied access (403)"
         case "404":
-            return "URL does not exist (404)"
+            return "Page not found (404)"
         case "500":
             return "Encountered internal error (500)"
         case _:
