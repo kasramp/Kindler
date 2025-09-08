@@ -7,15 +7,9 @@ from kindler.api.gutenberg_project import gutenberg_bp
 from kindler.api.home import home_bp
 from kindler.api.news import news_bp
 from kindler.api.web import web_bp
+from kindler.cache import cache, CACHE_CONFIG
 
 app = Flask(__name__)
-app.register_blueprint(web_bp)
-app.register_blueprint(gemini_bp)
-app.register_blueprint(news_bp)
-app.register_blueprint(gutenberg_bp)
-app.register_blueprint(home_bp)
-app.register_blueprint(error_bp)
-app.register_blueprint(healthz, url_prefix="/healthz")
 
 
 def liveness():
@@ -26,7 +20,18 @@ def readiness():
     return True, {"status": "up"}
 
 
+app.config.update(CACHE_CONFIG)
 app.config.update(HEALTHZ={"live": liveness, "ready": readiness})
+
+cache.init_app(app)
+
+app.register_blueprint(web_bp)
+app.register_blueprint(gemini_bp)
+app.register_blueprint(news_bp)
+app.register_blueprint(gutenberg_bp)
+app.register_blueprint(home_bp)
+app.register_blueprint(error_bp)
+app.register_blueprint(healthz, url_prefix="/healthz")
 
 
 @app.errorhandler(404)
