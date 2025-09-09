@@ -38,13 +38,29 @@ $ pip3 install -r requirements.txt
 
 ## Run the project
 
+The project is dependent on Redis. Make sure to have it available.
+
 ### Development
+
+For local development, before running the project, bring up the Redis from `docker-compose.yml` file:
+
+```bash
+$ docker compose -f docker-compose.yml up
+```
+
+Then run:
 
 ```bash
 $ python -m kindler.app
 ```
 
 ### Production (Gunicorn WSGI)
+
+Ensure the Redis cluster is up and running. Then set the below env var:
+
+```bash
+$ export REDIS_URL=[YOUR_REDIS_URL]
+```
 
 ```bash
 $ gunicorn kindler.wsgi:app
@@ -55,7 +71,6 @@ $ gunicorn kindler.wsgi:app
 To support generating epub, mobi, azw3 of pages on the fly, need to install calibre, or more specific `ebook-convert` as it's invoked as a sub process to generate ebooks.
 
 The usage of `aspose-words` library is remove as it not only left a notice that the library is not paid for but also wouldn't convert more than 20 pages. So it was too annoying to work with.
-
 
 ## Docker build
 
