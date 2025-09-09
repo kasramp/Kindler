@@ -3,6 +3,8 @@ version: '3.8'
 services:
   web:
     image: "kasramp/kindler:${IMAGE_TAG:-latest}"
+    environment:
+      REDIS_URL: ${REDIS_URL}
     deploy:
       replicas: 2
       restart_policy:

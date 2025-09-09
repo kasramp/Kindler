@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "17285:6379"
+    command: ["redis-server", "--requirepass", "secret"]
+    environment:
+      - REDIS_USERNAME=default
+      - REDIS_PASSWORD=secret
