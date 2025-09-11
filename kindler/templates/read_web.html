@@ -22,6 +22,7 @@
             <a href="{{ url_for('web.save_page', url=url, format='epub', q=query) }}">[.epub]</a>
             <a href="{{ url_for('web.save_page', url=url, format='mobi', q=query) }}">[.mobi]</a>
             <a href="{{ url_for('web.save_page', url=url, format='azw3', q=query) }}">[.azw3]</a>
+            <a href="{{ url_for('web.readability_page', url=url, alternative_renderer=True, q=query) }}">[alternative renderer]</a>
         </p>
     </div>
     <h1>{{ title | safe }}</h1>

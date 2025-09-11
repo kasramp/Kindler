@@ -11,6 +11,8 @@ from flask import render_template, Blueprint, request, Response, redirect, url_f
 from flask import send_file, abort
 from pathvalidate import sanitize_filename
 from readabilipy import simple_json_from_html_string
+from readability import Document
+
 
 web_bp = Blueprint("web", __name__, url_prefix="/web")
 
@@ -43,6 +45,7 @@ def search():
 @web_bp.route("/readability")
 def readability_page():
     query = request.args.get("q")
+    alternative_renderer = request.args.get("alternative_renderer")
     url = request.args.get("url")
     if not url:
         logging.warning("Readability URL is empty.")
@@ -50,12 +53,16 @@ def readability_page():
     try:
         req = requests.get(url, headers=HEADERS, timeout=10)
         req.raise_for_status()
-        article = simple_json_from_html_string(req.text, use_readability=True)
+        # TODO - Add a fallback and get it from Query Param
+        if alternative_renderer:
+            article = get_js_readability_result(req.text, url, query)
+        else:
+            article = get_python_readability_result(req.text, url, query)
         return render_template(
             "read_web.html",
             title=article["title"],
             query=query,
-            content=clean_readability_html(article["content"], url, query),
+            content=article["content"],
             url=url,
         )
 
@@ -81,11 +88,11 @@ def save_page():
         abort(400, "Invalid format")
 
     req = requests.get(url, headers=HEADERS, timeout=10)
-    article = simple_json_from_html_string(req.text, use_readability=True)
+    article = get_python_readability_result(req.text, url, query)
     html_content = render_template(
         "read_save_formatted.html",
         title=article["title"],
-        content=clean_readability_html(article["content"], url, query),
+        content=article["content"],
         url=url,
     )
     if "html" == save_format:
@@ -141,8 +148,30 @@ def save_page():
             abort(500, f"Conversion failed: {e}")
 
 
-def clean_readability_html(html_content, base_url, query):
+def get_python_readability_result(html_content, base_url, query):
+    doc = Document(html_content)
+    return {
+        "content": clean_readability_html(doc.summary(), base_url, query, True),
+        "title": doc.short_title(),
+    }
+
+
+def get_js_readability_result(html_content, base_url, query):
+    article = simple_json_from_html_string(html_content, use_readability=True)
+    return {
+        "content": clean_readability_html(article["content"], base_url, query),
+        "title": article["title"],
+    }
+
+
+def clean_readability_html(html_content, base_url, query, only_links_rewrite=False):
     soup = BeautifulSoup(html_content, "html.parser")
+
+    rewrite_links(soup, base_url, query)
+    if only_links_rewrite:
+        return "\n".join(
+            line.strip() for line in str(soup).splitlines() if line.strip()
+        )
 
     # --- Remove unhelpful tags (media, scripts, forms, etc.) ---
     for tag in soup.find_all(
@@ -177,20 +206,6 @@ def clean_readability_html(html_content, base_url, query):
         "ol", class_=lambda c: c and ("menu" in c.lower() or "nav" in c.lower())
     ):
         ol.decompose()
-
-    # --- Rewrite links to go through /web/readability ---
-    readability_endpoint = f"/web/readability?q={query}&url="
-    for link in soup.find_all("a", href=True):
-        href = link["href"]
-        if href.startswith("#"):
-            # Remove back-to-top style anchors
-            link.decompose()
-            continue
-        absolute_url = urljoin(base_url, href)
-        if urlparse(absolute_url).scheme not in ("http", "https"):
-            continue
-        encoded = quote(absolute_url, safe="")
-        link["href"] = f"{readability_endpoint}{encoded}"
 
     # --- Strip attributes (keep only essential ones) ---
     for tag in soup.find_all(True):
@@ -250,3 +265,19 @@ def clean_readability_html(html_content, base_url, query):
 
     # --- Return cleaned HTML ---
     return "\n".join(line.strip() for line in str(soup).splitlines() if line.strip())
+
+
+def rewrite_links(soup, base_url, query):
+    # --- Rewrite links to go through /web/readability ---
+    readability_endpoint = f"/web/readability?q={query}&url="
+    for link in soup.find_all("a", href=True):
+        href = link["href"]
+        if href.startswith("#"):
+            # Remove back-to-top style anchors
+            link.decompose()
+            continue
+        absolute_url = urljoin(base_url, href)
+        if urlparse(absolute_url).scheme not in ("http", "https"):
+            continue
+        encoded = quote(absolute_url, safe="")
+        link["href"] = f"{readability_endpoint}{encoded}"
