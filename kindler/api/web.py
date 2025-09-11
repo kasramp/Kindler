@@ -120,9 +120,11 @@ def save_page():
                     "--title",
                     article["title"],
                     "--chapter",
-                    "//h1",
+                    "//h2",
                     "--level1-toc",
-                    "//h1",
+                    "//h2",
+                    "--chapter-mark",
+                    "pagebreak",
                 ],
                 check=True,
             )
@@ -168,30 +170,11 @@ def clean_readability_html(html_content, base_url, query, only_links_rewrite=Fal
     soup = BeautifulSoup(html_content, "html.parser")
 
     rewrite_links(soup, base_url, query)
+    remove_images(soup)
     if only_links_rewrite:
         return "\n".join(
             line.strip() for line in str(soup).splitlines() if line.strip()
         )
-
-    # --- Remove unhelpful tags (media, scripts, forms, etc.) ---
-    for tag in soup.find_all(
-        [
-            "img",
-            "picture",
-            "source",
-            "figure",
-            "script",
-            "style",
-            "iframe",
-            "form",
-            "button",
-            "noscript",
-            "svg",
-            "video",
-            "audio",
-        ]
-    ):
-        tag.decompose()
 
     # --- Drop navigation/menus explicitly ---
     for nav in soup.find_all("nav"):
@@ -281,3 +264,25 @@ def rewrite_links(soup, base_url, query):
             continue
         encoded = quote(absolute_url, safe="")
         link["href"] = f"{readability_endpoint}{encoded}"
+
+
+def remove_images(soup):
+    # --- Remove unhelpful tags (media, scripts, forms, etc.) ---
+    for tag in soup.find_all(
+        [
+            "img",
+            "picture",
+            "source",
+            "figure",
+            "script",
+            "style",
+            "iframe",
+            "form",
+            "button",
+            "noscript",
+            "svg",
+            "video",
+            "audio",
+        ]
+    ):
+        tag.decompose()
