@@ -123,7 +123,8 @@ def save_page():
                     "//h2",
                     "--level1-toc",
                     "//h2",
-                    "--chapter-mark", "pagebreak"
+                    "--chapter-mark",
+                    "pagebreak",
                 ],
                 check=True,
             )
@@ -264,23 +265,24 @@ def rewrite_links(soup, base_url, query):
         encoded = quote(absolute_url, safe="")
         link["href"] = f"{readability_endpoint}{encoded}"
 
+
 def remove_images(soup):
     # --- Remove unhelpful tags (media, scripts, forms, etc.) ---
     for tag in soup.find_all(
-            [
-                "img",
-                "picture",
-                "source",
-                "figure",
-                "script",
-                "style",
-                "iframe",
-                "form",
-                "button",
-                "noscript",
-                "svg",
-                "video",
-                "audio",
-            ]
+        [
+            "img",
+            "picture",
+            "source",
+            "figure",
+            "script",
+            "style",
+            "iframe",
+            "form",
+            "button",
+            "noscript",
+            "svg",
+            "video",
+            "audio",
+        ]
     ):
         tag.decompose()
