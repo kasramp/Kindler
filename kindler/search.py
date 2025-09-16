@@ -1,11 +1,26 @@
-# search.py
+import logging
+import os
+
 import pandas as pd
 from rapidfuzz import process, fuzz
 
 
 class FuzzySearcher:
+    possible_paths = [
+        "scripts/gutindex_aus_clean.csv",
+        "../scripts/gutindex_aus_clean.csv",
+    ]
+
     def __init__(self):
-        self.df = pd.read_csv("../scripts/gutindex_aus_clean.csv")
+        for path in self.possible_paths:
+            if os.path.exists(path):
+                self.df = pd.read_csv(path)
+                logging.info(f"Loaded CSV from: {path}")
+                break
+        else:
+            raise FileNotFoundError(
+                f"CSV not found in any of the paths: {self.possible_paths}"
+            )
         self.df["combined"] = (
             self.df["title"].astype(str)
             + " "
