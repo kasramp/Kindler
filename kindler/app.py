@@ -3,6 +3,7 @@ from flask_healthz import healthz
 
 from kindler.api.error import error_bp
 from kindler.api.gemini import gemini_bp
+from kindler.api.gutenberg_au_project import gutenberg_au_bp
 from kindler.api.gutenberg_project import gutenberg_bp
 from kindler.api.home import home_bp
 from kindler.api.news import news_bp
@@ -29,6 +30,7 @@ app.register_blueprint(web_bp)
 app.register_blueprint(gemini_bp)
 app.register_blueprint(news_bp)
 app.register_blueprint(gutenberg_bp)
+app.register_blueprint(gutenberg_au_bp)
 app.register_blueprint(home_bp)
 app.register_blueprint(error_bp)
 app.register_blueprint(healthz, url_prefix="/healthz")

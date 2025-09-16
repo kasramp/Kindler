@@ -13,7 +13,6 @@ from pathvalidate import sanitize_filename
 from readabilipy import simple_json_from_html_string
 from readability import Document
 
-
 web_bp = Blueprint("web", __name__, url_prefix="/web")
 
 HEADERS = {
@@ -51,9 +50,26 @@ def readability_page():
         logging.warning("Readability URL is empty.")
         return redirect(url_for("error.error", status_code=400))
     try:
+        try:
+            head_resp = requests.head(
+                url, headers=HEADERS, allow_redirects=True, timeout=5
+            )
+            content_type = head_resp.headers.get("Content-Type", "").lower()
+            if content_type and not (
+                content_type.startswith("text/html")
+                or content_type.startswith("application/xhtml+xml")
+            ):
+                return redirect(url)
+        except requests.RequestException:
+            logging.info(f"HEAD request failed for {url}, falling back to GET.")
         req = requests.get(url, headers=HEADERS, timeout=10)
         req.raise_for_status()
-        # TODO - Add a fallback and get it from Query Param
+        content_type = req.headers.get("Content-Type", "").lower()
+        if not (
+            content_type.startswith("text/html")
+            or content_type.startswith("application/xhtml+xml")
+        ):
+            return redirect(url)
         if alternative_renderer:
             article = get_js_readability_result(req.text, url, query)
         else:
