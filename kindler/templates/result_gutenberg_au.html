@@ -19,7 +19,7 @@
         <tr>
             {% for result in results %}
             <td>
-                <a href="{{ url_for('web.readability_page', url=result['url_html'], q=query) }}">
+                <a href="{{ url_for('gutenberg_au.readability_page', url=result['url_html'], q=query) }}">
 
                 <small>{{ result['title'] }}</small>
                 <small>{{ result['author'] }}</small>
