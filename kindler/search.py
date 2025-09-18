@@ -8,6 +8,7 @@ class FuzzySearcher:
     possible_paths = [
         "scripts/gutindex_aus_clean.csv",
         "../scripts/gutindex_aus_clean.csv",
+        "/app/scripts/",
     ]
 
     def __init__(self):

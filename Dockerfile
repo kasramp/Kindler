@@ -6,6 +6,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY kindler ./kindler
+COPY scripts/gutindex_aus_clean.csv ./scripts/
 
 EXPOSE 8181
 
