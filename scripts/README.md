@@ -20,3 +20,20 @@ The cleaned version of the original index is available to diff purpose. In case 
 decides again to add new titles, we can simply get the diff the updated version (after some minor cleaning of course).
 
 Otherwise, the `gutindex_aus_clean.csv` will be used without any new revision.
+
+## Local index
+
+It's possible to build a better and more comprehensive index by scanning through all the ebooks (stored locally)
+and parse each html to build a more accurate index. Of course still many records have wrong values
+since the template used by Project Gutenberg Australia is not consistent and evolved throughout the years.
+
+To build a local index, run:
+
+```python
+$ python3 build_index_from_local_storage.py
+```
+
+If needed, adjust the row file path.
+
+This index also relies on building the `.epub`, `.mobi` and `.azw3` regardless of they existence
+in Project Gutenberg Australia.
