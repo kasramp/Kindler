@@ -1,6 +1,5 @@
 import logging
 import os
-
 import pandas as pd
 from rapidfuzz import process, fuzz
 
@@ -14,43 +13,56 @@ class FuzzySearcher:
     def __init__(self):
         for path in self.possible_paths:
             if os.path.exists(path):
-                self.df = pd.read_csv(path)
+                self.df = pd.read_csv(path, encoding="utf-8").fillna("")
                 logging.info(f"Loaded CSV from: {path}")
                 break
         else:
             raise FileNotFoundError(
                 f"CSV not found in any of the paths: {self.possible_paths}"
             )
-        self.df["combined"] = (
-            self.df["title"].astype(str)
+
+        self.df["title_final"] = self.df["full_title"].where(
+            self.df["full_title"] != "", self.df["title"]
+        )
+        self.df["author_final"] = self.df["full_author"].where(
+            self.df["full_author"] != "", self.df["author"]
+        )
+        self.df["search_text"] = (
+            self.df["title_final"].astype(str).str.lower()
             + " "
-            + self.df["author"].astype(str)
-            + " "
-            + self.df["full_title"].astype(str)
-            + " "
-            + self.df["full_author"].astype(str)
+            + self.df["author_final"].astype(str).str.lower()
         )
 
-    def search(self, query, limit=50, score_cutoff=70):
+    def search(
+        self,
+        query: str,
+        limit: int = 50,
+        score_cutoff: int = 50,
+        scorer=fuzz.token_set_ratio,
+    ):
+        if not query:
+            return []
+
         matches = process.extract(
-            query,
-            self.df["combined"].tolist(),
-            scorer=fuzz.WRatio,
-            limit=None,  # Get all matches to sort properly
+            query.lower(),
+            self.df["search_text"].tolist(),
+            scorer=scorer,
             score_cutoff=score_cutoff,
+            limit=limit * 5,
         )
 
         if not matches:
             return []
-        df_results = pd.DataFrame(
-            [{**self.df.iloc[i].to_dict(), "score": score} for _, score, i in matches]
+
+        indices = [i for _, score, i in matches]
+        scores = [score for _, score, _ in matches]
+
+        df_results = self.df.iloc[indices].copy()
+        df_results["score"] = scores
+
+        df_results = df_results.sort_values(
+            by=["score", "author_final", "title_final"],
+            ascending=[False, True, True],
         )
-        df_results["title"] = df_results["full_title"].combine_first(
-            df_results["title"]
-        )
-        df_results["author"] = df_results["full_author"].combine_first(
-            df_results["author"]
-        )
-        df_results = df_results.sort_values(by="score", ascending=False)
-        df_results = df_results.head(limit)
-        return df_results.to_dict(orient="records")
+
+        return df_results.head(limit).to_dict(orient="records")
