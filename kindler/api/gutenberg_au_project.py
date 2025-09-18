@@ -21,6 +21,7 @@ from flask import (
 from pathvalidate import sanitize_filename
 
 from kindler.search import FuzzySearcher
+from kindler.util import is_blob_content
 
 gutenberg_au_bp = Blueprint("gutenberg_au", __name__, url_prefix="/gutenberg_au")
 
@@ -51,23 +52,8 @@ def readability_page():
         logging.warning("Readability URL is empty.")
         return redirect(url_for("error.error", status_code=400))
     try:
-        try:
-            head_resp = requests.head(url, allow_redirects=True, timeout=5)
-            content_type = head_resp.headers.get("Content-Type", "").lower()
-            if content_type and not (
-                content_type.startswith("text/html")
-                or content_type.startswith("application/xhtml+xml")
-            ):
-                return redirect(url)
-        except requests.RequestException:
-            logging.info(f"HEAD request failed for {url}, falling back to GET.")
-        req = requests.get(url, timeout=10)
-        req.raise_for_status()
-        content_type = req.headers.get("Content-Type", "").lower()
-        if not (
-            content_type.startswith("text/html")
-            or content_type.startswith("application/xhtml+xml")
-        ):
+        is_blob, req = is_blob_content(url)
+        if is_blob:
             return redirect(url)
         article = get_python_readability_result(req.text, url)
         return render_template(
