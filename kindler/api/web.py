@@ -13,6 +13,7 @@ from pathvalidate import sanitize_filename
 from readabilipy import simple_json_from_html_string
 from readability import Document
 
+from kindler.util import is_blob_content
 
 web_bp = Blueprint("web", __name__, url_prefix="/web")
 
@@ -51,9 +52,9 @@ def readability_page():
         logging.warning("Readability URL is empty.")
         return redirect(url_for("error.error", status_code=400))
     try:
-        req = requests.get(url, headers=HEADERS, timeout=10)
-        req.raise_for_status()
-        # TODO - Add a fallback and get it from Query Param
+        is_blob, req = is_blob_content(url)
+        if is_blob:
+            return redirect(url)
         if alternative_renderer:
             article = get_js_readability_result(req.text, url, query)
         else:
