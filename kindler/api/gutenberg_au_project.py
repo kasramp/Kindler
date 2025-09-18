@@ -100,7 +100,7 @@ def save_page():
     if "html" == save_format:
         article = get_python_readability_result(req.text, url, None)
         html_content = render_template(
-            "read_save_formatted.html",
+            "read_save_formatted_gutenberg_au.html",
             title=article["title"],
             content=article["content"],
             url=url,
@@ -115,7 +115,7 @@ def save_page():
         os.makedirs(temp_dir, exist_ok=True)
         article = get_python_readability_result(req.text, url, img_dir=temp_dir)
         html_content = render_template(
-            "read_save_formatted.html",
+            "read_save_formatted_gutenberg_au.html",
             title=article["title"],
             content=article["content"],
             url=url,
@@ -133,7 +133,6 @@ def save_page():
                 "ebook-convert",
                 input_html_file,
                 output_file,
-                "--disable-internal-toc",
                 "--chapter",
                 "//div[@style='page-break-before: always;']",
                 "--chapter-mark",
@@ -221,7 +220,12 @@ def remove_excessive_elements(html_content, url, img_dir):
             if not cover_image_path:
                 cover_image_path = local_path
             try:
-                img_data = requests.get(img_url, timeout=10).content
+                img_request = requests.get(img_url, timeout=10)
+                if img_request.status_code != 200:
+                    cover_image_path = None
+                    img.extract()
+                    continue
+                img_data = img_request.content
                 with open(local_path, "wb") as f:
                     f.write(img_data)
                 if cover_image_path == local_path:
@@ -232,8 +236,25 @@ def remove_excessive_elements(html_content, url, img_dir):
                 logging.error(f"Failed to download {img_url}: {e}")
         else:
             img["src"] = img_url
-        if img_dir:
-            for hr in soup.find_all("hr"):
-                page_break_div = soup.new_tag("div", style="page-break-before: always;")
-                hr.replace_with(page_break_div)
+    if img_dir:
+        fix_by_keyword_on_ebook_generation(soup)
+        for hr in soup.find_all("hr"):
+            page_break_div = soup.new_tag("div", style="page-break-before: always;")
+            hr.replace_with(page_break_div)
     return str(soup), cover_image_path, soup.title.string
+
+
+def fix_by_keyword_on_ebook_generation(soup):
+    headers = soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
+    for i, header in enumerate(headers):
+        if "by" in header.get_text(strip=True).lower():
+            j = i + 1
+            while j < len(headers):
+                next_header = headers[j]
+                if not next_header.get_text(strip=True):
+                    j += 1
+                    continue
+                if next_header.name in ["h1", "h2"]:
+                    next_header.name = "h4"
+                break
+            break
