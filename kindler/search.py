@@ -6,9 +6,9 @@ from rapidfuzz import process, fuzz
 
 class FuzzySearcher:
     possible_paths = [
-        "scripts/gutindex_aus_clean.csv",
-        "../scripts/gutindex_aus_clean.csv",
-        "/app/scripts/",
+        "scripts/index.csv",
+        "../scripts/index.csv",
+        "/app/scripts/index.csv",
     ]
 
     def __init__(self):
@@ -22,17 +22,12 @@ class FuzzySearcher:
                 f"CSV not found in any of the paths: {self.possible_paths}"
             )
 
-        self.df["title_final"] = self.df["full_title"].where(
-            self.df["full_title"] != "", self.df["title"]
-        )
-        self.df["author_final"] = self.df["full_author"].where(
-            self.df["full_author"] != "", self.df["author"]
-        )
         self.df["search_text"] = (
-            self.df["title_final"].astype(str).str.lower()
+            self.df["title"].astype(str).str.lower()
             + " "
-            + self.df["author_final"].astype(str).str.lower()
-        )
+            + self.df["author"].astype(str).str.lower()
+        ).str.strip()
+        self.df = self.df[self.df["search_text"] != ""].copy()
 
     def search(
         self,
@@ -62,7 +57,7 @@ class FuzzySearcher:
         df_results["score"] = scores
 
         df_results = df_results.sort_values(
-            by=["score", "author_final", "title_final"],
+            by=["score", "author", "title"],
             ascending=[False, True, True],
         )
 
