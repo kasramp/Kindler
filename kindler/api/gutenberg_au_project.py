@@ -38,6 +38,32 @@ def home():
 @gutenberg_au_bp.route("/search")
 def search():
     # TODO - support multiple pages
+
+    API_KEY = "API_KEY"
+    BASE_URL = "https://www.googleapis.com/books/v1/volumes"
+
+    params = {
+        "q": "intitle:1984+inauthor:Orwell",
+        "langRestrict": "en",
+        "orderBy": "relevance",
+        "key": API_KEY,
+        "maxResults": 10
+    }
+
+    try:
+        response = requests.get(BASE_URL, params=params)
+        response.raise_for_status()  # Raise an exception for bad status codes
+        data = response.json()
+
+        if 'items' in data:
+            english_books = [item for item in data['items'] if item['volumeInfo'].get('language') == 'en']
+            print(english_books)
+        else:
+            print("No results found.")
+
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+
     query = request.args.get("q")
     books = searcher.search(query)
     return render_template("result_gutenberg_au.html", query=query, results=books)
