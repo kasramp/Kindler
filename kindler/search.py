@@ -62,3 +62,17 @@ class FuzzySearcher:
         )
 
         return df_results.head(limit).to_dict(orient="records")
+
+    def lookup_by_remote_url(self, url: str):
+        if not url:
+            return None
+        mask = self.df["remote_url"].str.lower() == url.lower()
+        df_result = self.df[mask]
+
+        if df_result.empty:
+            return None
+
+        result = df_result.iloc[0].to_dict()
+        result["score"] = 100
+
+        return result

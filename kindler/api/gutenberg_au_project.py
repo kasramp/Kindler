@@ -7,7 +7,7 @@ import uuid
 from urllib.parse import urljoin
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 from flask import (
     render_template,
     Blueprint,
@@ -119,6 +119,10 @@ def save_page():
                 "ebook-convert",
                 input_html_file,
                 output_file,
+                "--title",
+                article["title"],
+                "--authors",
+                article["author"],
                 "--chapter",
                 "//div[@style='page-break-before: always;']",
                 "--chapter-mark",
@@ -157,7 +161,17 @@ def get_python_readability_result(html_content, base_url, img_dir=None):
     content, cover_image_path, title = remove_excessive_elements(
         html_content, base_url, img_dir
     )
-    return {"content": content, "title": title, "cover": cover_image_path}
+    book_entry = searcher.lookup_by_remote_url(base_url)
+    if img_dir and not cover_image_path:
+        cover_image_path = attempt_to_retrieve_google_books_image_as_book_cover(
+            book_entry, img_dir
+        )
+    return {
+        "content": content,
+        "title": title,
+        "cover": cover_image_path,
+        "author": book_entry["author"],
+    }
 
 
 def remove_excessive_elements(html_content, url, img_dir):
@@ -194,6 +208,13 @@ def remove_excessive_elements(html_content, url, img_dir):
             for element in list(h2.find_all_next()):
                 element.extract()
             h2.extract()
+    comment = soup.find(
+        string=lambda text: isinstance(text, Comment)
+        and "ebook footer include" in text.lower()
+    )
+    if comment:
+        for sibling in list(comment.next_siblings):
+            sibling.extract()
     for i, img in enumerate(soup.find_all("img")):
         src = img.get("src")
         if not src:
@@ -244,3 +265,22 @@ def fix_by_keyword_on_ebook_generation(soup):
                     next_header.name = "h4"
                 break
             break
+
+
+def attempt_to_retrieve_google_books_image_as_book_cover(book_entry, img_dir):
+    if not book_entry or not book_entry["image_google_book"]:
+        return None
+    img_url = book_entry["image_google_book"]
+    ext = os.path.splitext(img_url)[1] or ".png"
+    local_filename = f"imggoogle{ext}"
+    local_path = os.path.join(img_dir, local_filename)
+    try:
+        img_request = requests.get(img_url, timeout=10)
+        if img_request.status_code != 200:
+            return None
+        img_data = img_request.content
+        with open(local_path, "wb") as f:
+            f.write(img_data)
+    except Exception as e:
+        logging.error(f"Failed to download {img_url}: {e}")
+    return local_path
