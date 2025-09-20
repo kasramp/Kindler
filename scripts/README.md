@@ -27,6 +27,9 @@ It's possible to build a better and more comprehensive index by scanning through
 and parse each html to build a more accurate index. Of course still many records have wrong values
 since the template used by Project Gutenberg Australia is not consistent and evolved throughout the years.
 
+First make sure to set up a venv and install all dependencies. Refer to the parent's README file
+on setting up a venv.
+
 To build a local index, run:
 
 ```python
