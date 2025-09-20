@@ -20,9 +20,16 @@
             {% for result in results %}
             <td>
                 <a href="{{ url_for('gutenberg_au.readability_page', url=result['remote_url'], q=query) }}">
-
-                <small>{{ result['title'] }}</small>
-                <small>{{ result['author'] }}</small>
+                    {% if result['image_remote_location'] %}
+                        <img src="{{ result['image_remote_location'] }}" alt="{{ result['author'] }}">
+                        <small>{{ result['title'] }}</small>
+                    {% elif result['image_google_book'] %}
+                        <img src="{{ result['image_google_book'] }}" alt="{{ result['author'] }}">
+                        <small>{{ result['title'] }}</small>
+                    {% else %}
+                        <small>{{ result['title'] }}</small>
+                        <small>{{ result['author'] }}</small>
+                    {% endif %}
                 </a>
             </td>
             {% if loop.index % 3 == 0 and not loop.last %}

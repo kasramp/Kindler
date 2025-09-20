@@ -2,7 +2,10 @@ import os
 import sys
 import csv
 import re
+
+import requests
 from bs4 import BeautifulSoup, Tag
+from google_books_api_wrapper.api import GoogleBooksAPI
 
 AUTHOR_RE = re.compile(r"author:\s*(.+)", re.IGNORECASE)
 TITLE_RE = re.compile(r"title:\s*(.+)", re.IGNORECASE)
@@ -12,12 +15,19 @@ BASE_URL = "http://gutenberg.net.au/"
 
 
 def extract_author_title(html_path):
-    author, title = None, None
-
+    author, title, image_src = None, None, None
     try:
         with open(html_path, "r", encoding="utf-8", errors="ignore") as f:
             soup = BeautifulSoup(f, "html.parser")
 
+        for i, img in enumerate(soup.find_all("img")):
+            image_src = img.get("src")
+            if "pga-australia.jpg" in image_src:
+                continue
+            if image_src:
+                break
+        if "pga-australia.jpg" in image_src:
+            image_src = None
         # Step 1: Try "Author:" / "Title:" regex first
         for text in soup.stripped_strings:
             if author is None:
@@ -29,7 +39,7 @@ def extract_author_title(html_path):
                 if m:
                     title = m.group(1).strip()
             if author and title:
-                return author, title
+                return author, title, image_src
 
         # Step 2: Look for first "by" anywhere
         all_tags = [el for el in soup.descendants if isinstance(el, Tag)]
@@ -66,14 +76,14 @@ def extract_author_title(html_path):
                     title = prev_heading
                     author = next_heading
                     break
-
     except Exception as e:
         print(f"Error parsing {html_path}: {e}")
 
-    return author, title
+    return author, title, image_src
 
 
 def main(input_file, output_file="output.csv"):
+    google_books = GoogleBooksAPI()
     base_path = os.path.dirname(os.path.abspath(input_file))
     with open(input_file, "r", encoding="utf-8") as f:
         html_files = [line.strip() for line in f if line.strip()]
@@ -81,15 +91,53 @@ def main(input_file, output_file="output.csv"):
     with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(
-            ["author", "title", "location", "relative_location", "remote_url"]
+            [
+                "author",
+                "title",
+                "location",
+                "relative_location",
+                "remote_url",
+                "image_relative_location",
+                "image_remote_location",
+                "image_google_book",
+                "description",
+            ]
         )
 
         for html_path in html_files:
+            description = None
+            image_remote_location = None
+            image_google_book = None
             relative_location = os.path.relpath(html_path, base_path)
             remote_url = BASE_URL + relative_location
-            author, title = extract_author_title(html_path)
+            author, title, image_relative_location = extract_author_title(html_path)
+            if image_relative_location:
+                image_relative_location = (
+                    os.path.dirname(relative_location) + "/" + image_relative_location
+                )
+                image_remote_location = BASE_URL + image_relative_location
+                response = requests.get(image_remote_location)
+                if response.status_code != 200:
+                    image_remote_location = None
+            if title or author:
+                result = google_books.search_book(
+                    title=title, author=author
+                ).get_best_match()
+                if result is not None:
+                    image_google_book = result.large_thumbnail
+                    description = result.description
             writer.writerow(
-                [author or "", title or "", html_path, relative_location, remote_url]
+                [
+                    author or "",
+                    title or "",
+                    html_path,
+                    relative_location,
+                    remote_url,
+                    image_relative_location,
+                    image_remote_location,
+                    image_google_book,
+                    description,
+                ]
             )
 
 
