@@ -221,7 +221,7 @@ def remove_excessive_elements(html_content, url, img_dir):
             continue
         img_url = urljoin(url, src)
         if img_dir:
-            ext = os.path.splitext(img_url)[1] or ".png"
+            ext = os.path.splitext(img_url)[1] or ".jpg"
             local_filename = f"img{i}{ext}"
             local_path = os.path.join(img_dir, local_filename)
             if not cover_image_path:
@@ -271,7 +271,7 @@ def attempt_to_retrieve_google_books_image_as_book_cover(book_entry, img_dir):
     if not book_entry or not book_entry["image_google_book"]:
         return None
     img_url = book_entry["image_google_book"]
-    ext = os.path.splitext(img_url)[1] or ".png"
+    ext = os.path.splitext(img_url)[1] or ".jpg"
     local_filename = f"imggoogle{ext}"
     local_path = os.path.join(img_dir, local_filename)
     try:
