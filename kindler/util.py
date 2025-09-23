@@ -10,6 +10,7 @@ HEADERS = {
     "DNT": "1",
 }
 
+
 def is_blob_content(url):
     try:
         head_resp = requests.head(url, allow_redirects=True, timeout=5)
@@ -31,4 +32,16 @@ def is_blob_content(url):
         or content_type.startswith("text/plain")
     ):
         return True, req
+    req = redirect_medium(url, req)
     return False, req
+
+
+def redirect_medium(url, response):
+    if 'content="Medium"' not in response.text:
+        return response
+    try:
+        req = requests.get("https://freedium.cfd/" + url, headers=HEADERS, timeout=10)
+        req.raise_for_status()
+        return req
+    except Exception:
+        return response
