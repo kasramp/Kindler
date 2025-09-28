@@ -50,7 +50,7 @@ def readability_page():
     url = request.args.get("url")
     if not url:
         logging.warning("Readability URL is empty.")
-        return redirect(url_for("error.error", status_code=400))
+        return redirect(url_for("error.error", status_code=400, url=url))
     try:
         is_blob, req = is_blob_content(url)
         if is_blob:
@@ -72,7 +72,7 @@ def readability_page():
         status_code = 500
         if hasattr(e, "response") and e.response is not None:
             status_code = getattr(e.response, "status_code", 500)
-        return redirect(url_for("error.error", status_code=status_code))
+        return redirect(url_for("error.error", status_code=status_code, url=url))
     except Exception as e:
         logging.error(f"An error occurred during readability processing: {e}")
         return f"An error occurred during processing: {e}", 500
