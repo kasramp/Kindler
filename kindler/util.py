@@ -1,6 +1,7 @@
 import logging
 
 import requests
+from requests.exceptions import SSLError
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
@@ -12,8 +13,11 @@ HEADERS = {
 
 
 def is_blob_content(url):
+    verify_cert = True
     try:
-        head_resp = requests.head(url, allow_redirects=True, timeout=5)
+        head_resp = requests.head(
+            url, allow_redirects=True, timeout=5, verify=verify_cert
+        )
         content_type = head_resp.headers.get("Content-Type", "").lower()
         if content_type and not (
             content_type.startswith("text/html")
@@ -21,9 +25,18 @@ def is_blob_content(url):
             or content_type.startswith("text/plain")
         ):
             return True, None
-    except requests.RequestException:
-        logging.info(f"HEAD request failed for {url}, falling back to GET.")
-    req = requests.get(url, headers=HEADERS, timeout=10)
+    except SSLError as error:
+        logging.info(
+            f"Cannot get cert, trying without cert verification. Error: {error}"
+        )
+        verify_cert = False
+    except requests.RequestException as error:
+        logging.info(
+            f"HEAD request failed for {url}, falling back to GET. Error: {error}"
+        )
+    req = requests.get(
+        url, headers=HEADERS, timeout=10, allow_redirects=True, verify=verify_cert
+    )
     req.raise_for_status()
     content_type = req.headers.get("Content-Type", "").lower()
     if not (
