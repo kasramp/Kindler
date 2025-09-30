@@ -5,8 +5,9 @@ error_bp = Blueprint("error", __name__, url_prefix="/error")
 
 @error_bp.route("")
 def error():
+    url = request.args.get("url")
     message = map_status_code_to_error(request.args.get("status_code"))
-    return render_template("error.html", message=message)
+    return render_template("error.html", message=message, url=url)
 
 
 def map_status_code_to_error(status_code):

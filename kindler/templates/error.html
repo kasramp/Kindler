@@ -18,6 +18,9 @@
         <p>Try going back to the home page or check the URL.</p>
     {% endif %}
     <a href="/" class="retry">Home</a>
+    {% if url %}
+        <a href="{{ url }}" class="retry">Direct</a>
+    {% endif %}
 </div>
 </body>
 </html>
