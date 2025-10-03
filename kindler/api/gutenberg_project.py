@@ -3,11 +3,10 @@ from flask import render_template, Blueprint, request
 
 gutenberg_bp = Blueprint("gutenberg", __name__, url_prefix="/gutenberg")
 
-HEADERS = {
- "Host": "localhost"
-}
+HEADERS = {"Host": "localhost"}
 base_url = "https://gutendex.com/books/"
 local_base_url = "http://gutendex_stack_web:9193/books/"
+
 
 @gutenberg_bp.route("/")
 def home():
@@ -37,10 +36,7 @@ def readability_page():
 def is_local_gutendex_accessible(query):
     try:
         response = requests.get(
-            local_base_url,
-            params={"search": query},
-            headers=HEADERS,
-            timeout=10
+            local_base_url, params={"search": query}, headers=HEADERS, timeout=10
         )
         return True, response
     except (requests.ConnectionError, requests.Timeout):
