@@ -1,5 +1,8 @@
+import logging
+
 from flask import Flask, redirect, url_for
 from flask_healthz import healthz
+from logging.config import dictConfig
 
 from kindler.api.error import error_bp
 from kindler.api.gemini import gemini_bp
@@ -9,6 +12,30 @@ from kindler.api.home import home_bp
 from kindler.api.news import news_bp
 from kindler.api.web import web_bp
 from kindler.cache import cache, CACHE_CONFIG
+
+
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            }
+        },
+        "handlers": {
+            "wsgi": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://flask.logging.wsgi_errors_stream",
+                "formatter": "default",
+            }
+        },
+        "root": {"level": "INFO", "handlers": ["wsgi"]},
+        "loggers": {
+            "flask.app": {"level": "INFO", "handlers": ["wsgi"], "propagate": False}
+        },
+    }
+)
+logging.info("Starting Flask app...")
 
 app = Flask(__name__)
 

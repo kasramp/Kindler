@@ -12,7 +12,7 @@ services:
     ports:
       - "8181:8181"
     networks:
-      - docker_gwbridge
+      - shared-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8181/healthz/ready"]
       interval: 30s
@@ -21,4 +21,5 @@ services:
       start_period: 10s
 
 networks:
-  docker_gwbridge:
+  shared-network:
+    external: true
