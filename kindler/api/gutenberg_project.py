@@ -1,4 +1,5 @@
 import requests
+import logging
 from flask import render_template, Blueprint, request
 
 gutenberg_bp = Blueprint("gutenberg", __name__, url_prefix="/gutenberg")
@@ -18,7 +19,7 @@ def search():
     # TODO - support multiple pages
     query = request.args.get("q")
     is_success, response = is_local_gutendex_accessible(query)
-    print(f"Result from local Gutendex is: {is_success}")
+    logging.info(f"Result of query '{query}' from local Gutendex is: {is_success}")
     if not is_success or response is None:
         response = requests.get(base_url, params={"search": query})
     books = response.json().get("results", [])
