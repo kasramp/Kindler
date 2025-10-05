@@ -181,8 +181,20 @@ def remove_excessive_elements(html_content, url, img_dir):
         style_tag.decompose()
     for p in soup.find_all("p", class_="author"):
         p["style"] = "text-align: center;"
-    heading = soup.find(["h1", "h2", "h3", "h4"])
+    heading = soup.find(lambda tag: tag.name in ["h1", "h2", "h3", "h4"])
     if heading:
+        # Should render this page properly now:
+        # http://gutenberg.net.au/ebooks09/0900481h.html
+        # if h? is wrapped in other tags like <center>
+        # remove <center> and move h? out to upper layer
+        if heading.parent.name not in ["body", "html"]:
+            heading_parent = heading.parent
+            heading_parent.insert_after(heading)
+            heading_parent.decompose()
+        # remove random tags inside of the h? tag
+        # keep it clean
+        for tag in heading.find_all(["big", "span"]):
+            tag.unwrap()
         for elem in list(heading.previous_siblings):
             if elem.name == "img":
                 continue
