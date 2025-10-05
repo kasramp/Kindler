@@ -181,7 +181,7 @@ def remove_excessive_elements(html_content, url, img_dir):
         style_tag.decompose()
     for p in soup.find_all("p", class_="author"):
         p["style"] = "text-align: center;"
-    heading = soup.find(lambda tag: tag.name in ["h1","h2","h3","h4"])
+    heading = soup.find(lambda tag: tag.name in ["h1", "h2", "h3", "h4"])
     if heading:
         # Should render this page properly now:
         # http://gutenberg.net.au/ebooks09/0900481h.html
