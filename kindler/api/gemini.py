@@ -32,7 +32,7 @@ def search():
         logging.warning("Search query is empty.")
         return "Please provide a search query.", 400
     response = get_gemini_content(f"{SEARCH_URL}/search?{query}")
-    html_content = gemtext_to_html(response["content"])["content"]
+    html_content = gemtext_to_html(response["content"], is_search=True)["content"]
     return render_template(
         "result_gemini.html",
         query=query,
@@ -47,15 +47,16 @@ def readability_page():
     if not url:
         logging.warning("Readability URL is empty.")
         return "Please provide a URL to clean.", 400
-
+    is_search_page = "gemini://tlgs.one/search" in url
     response = get_gemini_content(url)
-    html_content = gemtext_to_html(response["content"])
+    html_content = gemtext_to_html(response["content"], is_search_page)
     return render_template(
         "read_gemini.html",
         title=html_content["title"],
         content=clean_gemini_html(html_content["content"], url, query),
         url=url,
         query=query,
+        is_search_page=is_search_page,
     )
 
 
@@ -169,7 +170,7 @@ def get_gemini_content(url):
         return None
 
 
-def clean_gemini_html(html_content, base_url, query):
+def clean_gemini_html(html_content, base_url, query, is_search=False):
     soup = BeautifulSoup(html_content, "html.parser")
     for link in soup.find_all("a", href=True):
         href = link["href"]
