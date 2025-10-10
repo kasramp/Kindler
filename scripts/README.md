@@ -38,5 +38,34 @@ $ python3 build_index_from_local_storage.py
 
 If needed, adjust the row file path.
 
-This index also relies on building the `.epub`, `.mobi` and `.azw3` regardless of they existence
+This index also relies on building the `.epub`, `.mobi` and `.azw3` regardless of their existence
 in Project Gutenberg Australia.
+
+## Summary Generator
+
+The `summary_generator.py` generates a summary for each index stored in `index.csv` file.
+
+That means first a local index must be generated using `build_index_from_local_storage.py` and
+then generate the summaries.
+
+To generate a summary, the script relies on Ollama. Therefore, a strong machine or server is needed.
+To get the full advantage of the machine capabilities, better to natively install it on the machine and avoid
+Docker images.
+
+On mac:
+
+```bash
+$ sudo brew install ollama
+```
+
+And then run:
+
+```bash
+$ ollama serve
+```
+
+Building the summary takes a very long time. However, the script has the capability to
+resume from where it's left.
+
+**Keep in mind that** the script expects a running Ollama and doesn't check whether it's running or not.
+Hence, if it cannot reach Ollama, simply sets the entry as null.
