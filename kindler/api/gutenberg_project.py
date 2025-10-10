@@ -32,18 +32,29 @@ def readability_page():
 
 def search_book_from_gutendex_api(query):
     try:
-        response = requests.get(self_hosted_gutendex_base_url, params={"search": query}, timeout=5)
+        response = requests.get(
+            self_hosted_gutendex_base_url, params={"search": query}, timeout=5
+        )
         logging.info(f"Successfully called self-hosted Gutendex for: '{query}' keyword")
         return response
     except (requests.ConnectionError, requests.Timeout):
-        logging.info(f"Failed to call self-hosted Gutendex for: '{query}' keyword. Trying third-party now")
-        return requests.get(third_party_gutendex_base_url, params={"search": query}, timeout=5)
+        logging.info(
+            f"Failed to call self-hosted Gutendex for: '{query}' keyword. Trying third-party now"
+        )
+        return requests.get(
+            third_party_gutendex_base_url, params={"search": query}, timeout=5
+        )
+
 
 def retrieve_book_details_by_id_from_gutendex_api(book_id):
     try:
         response = requests.get(f"{self_hosted_gutendex_base_url}{book_id}", timeout=5)
-        logging.info(f"Successfully called self-hosted Gutendex to retrieve book details of book_id: '{book_id}'")
+        logging.info(
+            f"Successfully called self-hosted Gutendex to retrieve book details of book_id: '{book_id}'"
+        )
         return response
     except (requests.ConnectionError, requests.Timeout):
-        logging.info(f"Failed to call self-hosted Gutendex to retrieve book details of book_id: '{book_id}'. Trying third-party now")
+        logging.info(
+            f"Failed to call self-hosted Gutendex to retrieve book details of book_id: '{book_id}'. Trying third-party now"
+        )
         return requests.get(f"{third_party_gutendex_base_url}{book_id}", timeout=5)
