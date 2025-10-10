@@ -4,9 +4,8 @@ from flask import render_template, Blueprint, request
 
 gutenberg_bp = Blueprint("gutenberg", __name__, url_prefix="/gutenberg")
 
-HEADERS = {"Host": "localhost"}
-base_url = "https://gutendex.com/books/"
-local_base_url = "http://gutendex_stack_web:9193/books/"
+third_party_gutendex_base_url = "https://gutendex.com/books/"
+self_hosted_gutendex_base_url = "http://gutendex:9193/books/"
 
 
 @gutenberg_bp.route("/")
@@ -18,10 +17,7 @@ def home():
 def search():
     # TODO - support multiple pages
     query = request.args.get("q")
-    is_success, response = is_local_gutendex_accessible(query)
-    logging.info(f"Result of query '{query}' from local Gutendex is: {is_success}")
-    if not is_success or response is None:
-        response = requests.get(base_url, params={"search": query})
+    response = search_book_from_gutendex_api(query)
     books = response.json().get("results", [])
     return render_template("result_gutenberg.html", query=query, results=books)
 
@@ -30,15 +26,24 @@ def search():
 def readability_page():
     query = request.args.get("q")
     book_id = request.args.get("id")
-    response = requests.get(f"{base_url}{book_id}").json()
+    response = retrieve_book_details_by_id_from_gutendex_api(book_id).json()
     return render_template("read_gutenberg.html", query=query, book=response)
 
 
-def is_local_gutendex_accessible(query):
+def search_book_from_gutendex_api(query):
     try:
-        response = requests.get(
-            local_base_url, params={"search": query}, headers=HEADERS, timeout=10
-        )
-        return True, response
+        response = requests.get(self_hosted_gutendex_base_url, params={"search": query}, timeout=5)
+        logging.info(f"Successfully called self-hosted Gutendex for: '{query}' keyword")
+        return response
     except (requests.ConnectionError, requests.Timeout):
-        return False, None
+        logging.info(f"Failed to call self-hosted Gutendex for: '{query}' keyword. Trying third-party now")
+        return requests.get(third_party_gutendex_base_url, params={"search": query}, timeout=5)
+
+def retrieve_book_details_by_id_from_gutendex_api(book_id):
+    try:
+        response = requests.get(f"{self_hosted_gutendex_base_url}{book_id}", timeout=5)
+        logging.info(f"Successfully called self-hosted Gutendex to retrieve book details of book_id: '{book_id}'")
+        return response
+    except (requests.ConnectionError, requests.Timeout):
+        logging.info(f"Failed to call self-hosted Gutendex to retrieve book details of book_id: '{book_id}'. Trying third-party now")
+        return requests.get(f"{third_party_gutendex_base_url}{book_id}", timeout=5)
