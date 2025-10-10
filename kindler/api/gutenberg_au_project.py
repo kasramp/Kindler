@@ -48,30 +48,47 @@ def search():
 def readability_page():
     query = request.args.get("q")
     url = request.args.get("url")
+    direct = request.args.get("direct")
     if not url:
         logging.warning("Readability URL is empty.")
         return redirect(url_for("error.error", status_code=400, url=url))
-    try:
-        is_blob, req = is_blob_content(url)
-        if is_blob:
-            return redirect(url)
-        article = get_python_readability_result(req.text, url)
+    is_blob, req = is_blob_content(url)
+    if is_blob:
+        return redirect(url)
+    # Allow direct rendering of HTML to quickly detect
+    # and resolving rendering issues
+    # Should be deleted once have more stability
+    if not direct:
+        book = searcher.lookup_by_remote_url(url)
         return render_template(
             "read_gutenberg_au.html",
-            title=article["title"],
+            title=book["title"],
+            author=book["author"],
+            summary=book["summary"],
             query=query,
-            content=article["content"],
             url=url,
+            direct=False,
         )
-    except requests.exceptions.RequestException as e:
-        logging.warning(f"Network error fetching URL: {e}")
-        status_code = 500
-        if hasattr(e, "response") and e.response is not None:
-            status_code = getattr(e.response, "status_code", 500)
-        return redirect(url_for("error.error", status_code=status_code, url=url))
-    except Exception as e:
-        logging.error(f"An error occurred during readability processing: {e}")
-        return f"An error occurred during processing: {e}", 500
+    else:
+        try:
+            article = get_python_readability_result(req.text, url)
+            return render_template(
+                "read_gutenberg_au.html",
+                title=article["title"],
+                query=query,
+                content=article["content"],
+                url=url,
+                direct=True,
+            )
+        except requests.exceptions.RequestException as e:
+            logging.warning(f"Network error fetching URL: {e}")
+            status_code = 500
+            if hasattr(e, "response") and e.response is not None:
+                status_code = getattr(e.response, "status_code", 500)
+            return redirect(url_for("error.error", status_code=status_code, url=url))
+        except Exception as e:
+            logging.error(f"An error occurred during readability processing: {e}")
+            return f"An error occurred during processing: {e}", 500
 
 
 @gutenberg_au_bp.route("/save_page")

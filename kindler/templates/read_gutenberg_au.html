@@ -24,8 +24,14 @@
             <a href="{{ url_for('gutenberg_au.save_page', url=url, format='azw3') }}">[.azw3]</a>
         </p>
     </div>
-    <div class="content">
-        {{ content | safe }}
-    </div>
+    {% if direct %}
+        <div class="content">
+            {{ content | safe }}
+        </div>
+    {% else %}
+        <h1 class="h1-ebook">{{ title }}</h1>
+        <h2 class="h2-ebook">by {{ author }}</h2>
+        <p>{{ summary }} (This is an automatically generated summary.)</p>
+    {% endif %}
 </body>
 </html>
