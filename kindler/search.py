@@ -7,9 +7,9 @@ import re
 
 class FuzzySearcher:
     possible_paths = [
-        "scripts/index.csv",
-        "../scripts/index.csv",
-        "/app/scripts/index.csv",
+        "scripts/index_with_summary.csv",
+        "../scripts/index_with_summary.csv",
+        "/app/scripts/index_with_summary.csv",
     ]
 
     def __init__(self):

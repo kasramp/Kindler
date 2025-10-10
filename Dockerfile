@@ -6,7 +6,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY kindler ./kindler
-COPY scripts/index.csv ./scripts/
+COPY scripts/index_with_summary.csv ./scripts/
 
 EXPOSE 8181
 
