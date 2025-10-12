@@ -50,16 +50,15 @@ def readability_page():
     url = request.args.get("url")
     direct = request.args.get("direct")
     if not url:
-        logging.warning("Readability URL is empty.")
+        logging.warning("URL is empty.")
         return redirect(url_for("error.error", status_code=400, url=url))
-    is_blob, req = is_blob_content(url)
-    if is_blob:
-        return redirect(url)
     # Allow direct rendering of HTML to quickly detect
     # and resolving rendering issues
     # Should be deleted once have more stability
     if not direct:
         book = searcher.lookup_by_remote_url(url)
+        if not book:
+            return redirect(url_for("error.error", status_code=404))
         return render_template(
             "read_gutenberg_au.html",
             title=book["title"],
@@ -71,6 +70,9 @@ def readability_page():
         )
     else:
         try:
+            is_blob, req = is_blob_content(url)
+            if is_blob:
+                return redirect(url)
             article = get_python_readability_result(req.text, url)
             return render_template(
                 "read_gutenberg_au.html",
