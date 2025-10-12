@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="HandheldFriendly" content="true">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{{ book['title'] }}</title>
+</head>
+<body>
+    <div class="top-nav">
+        <a href="{{ url_for('standard_ebooks.home') }}">Home</a>
+        <form action="{{ url_for('standard_ebooks.search') }}" method="get">
+            <input type="text" id="q" name="q" value="{{ query }}">
+            <input type="submit" value="Search">
+        </form>
+    </div>
+    <hr>
+    <div class="source-info">
+        <p class="download-links">
+            {% if book['htmlUrl'] %}
+                <a href="{{ book['htmlUrl'] }}">[.html]</a>
+            {% endif %}
+            {% if book['epubUrl'] %}
+                <a href="{{ book['epubUrl'] }}">[.epub]</a>
+            {% endif %}
+            {% if book['koboUrl'] %}
+                <a href="{{ book['koboUrl'] }}">[.kepub]</a>
+            {% endif %}
+            {% if book['azwUrl'] %}
+                <a href="{{ book['azwUrl'] }}">[.azw3]</a>
+            {% endif %}
+        </p>
+    </div>
+    <h1 class="h1-ebook">{{ book['title'] }}</h1>
+    <h2 class="h2-ebook">by {{ book['author'] }}</h2>
+    <p>{{ book['summary'] }}</p>
+</body>
+</html>
